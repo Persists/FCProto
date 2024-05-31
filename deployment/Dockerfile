@@ -19,7 +19,7 @@ RUN go mod download
 
 # Set environment variables.
 ENV GOOS=linux \
-    GOARCH=arm64 
+    GOARCH=arm64
 
 # Copy the source code and build the fog binary.
 COPY ../cmd/fog ./cmd/fog
@@ -27,4 +27,3 @@ RUN go build -v -o fog-server ./cmd/fog
 
 COPY ../cmd/cloud ./cmd/cloud
 RUN go build -v -o cloud-server ./cmd/cloud
-
