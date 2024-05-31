@@ -1,14 +1,12 @@
-version: "3.7"
-
 services:
   fog:
     build:
       context: ./..
       dockerfile: deployment/Dockerfile
-    command: ["/fog-server"]
+    command: ["./fog-server"]
 
   cloud:
     build:
       context: ./..
       dockerfile: deployment/Dockerfile
-    command: ["/cloud-server"]
+    command: ["./cloud-server"]

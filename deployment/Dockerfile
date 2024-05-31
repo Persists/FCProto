@@ -1,27 +1,30 @@
 # Use the official Golang image to create a build artifact.
 FROM golang:1.22.3 as builder
 
+# Install necessary dependencies.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libzmq3-dev \
+    libczmq-dev
+
 # Create and change to the working directory.
 WORKDIR /app
 
-# Copy the go.mod file from the root directory.
+# Copy the go.mod and go.sum files from the root directory.
 COPY ./../go.mod ./
+COPY ./../go.sum ./
 
 # Retrieve application dependencies.
 RUN go mod download
 
-# Copy the source code from the cmd/fog directory and build the fog binary.
+# Set environment variables.
+ENV GOOS=linux \
+    GOARCH=arm64 
+
+# Copy the source code and build the fog binary.
 COPY ../cmd/fog ./cmd/fog
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o fog-server ./cmd/fog
+RUN go build -v -o fog-server ./cmd/fog
 
-# Copy the source code from the cmd/cloud directory and build the cloud binary.
 COPY ../cmd/cloud ./cmd/cloud
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o cloud-server ./cmd/cloud
-
-# Use a Docker multi-stage build to create a lean production image.
-FROM alpine:latest
-
-# Copy the binaries to the production image from the builder stage.
-COPY --from=builder /app/fog-server /fog-server
-COPY --from=builder /app/cloud-server /cloud-server
+RUN go build -v -o cloud-server ./cmd/cloud
 
