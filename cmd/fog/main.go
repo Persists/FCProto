@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net"
+	"time"
 
 	"github.com/Persists/fcproto/internal/shared/models"
 )
@@ -26,7 +27,7 @@ func sender(address string) {
 	log.Printf("connected to %s", address)
 
 	msg := models.Message{
-		Timestamp: 1234567890,
+		Timestamp: time.Now().Unix(),
 
 		Content: "Hello, World!",
 	}
