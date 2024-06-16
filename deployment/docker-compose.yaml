@@ -4,9 +4,19 @@ services:
       context: ./..
       dockerfile: deployment/Dockerfile
     command: ["./fog-server"]
+    networks:
+      - fog-cloud
 
   cloud:
     build:
       context: ./..
       dockerfile: deployment/Dockerfile
     command: ["./cloud-server"]
+    networks:
+      - fog-cloud
+    expose:
+      - 5555:5555
+
+networks:
+  fog-cloud:
+    driver: bridge

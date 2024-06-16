@@ -1,75 +1,56 @@
 package main
 
 import (
+	"io"
 	"log"
+	"net"
+)
 
-	"github.com/zeromq/goczmq"
+const (
+	addr = "localhost:5555"
 )
 
 func main() {
-	// Create a router socket and bind it to port 5555.
-	router, err := goczmq.NewRouter("tcp://*:5555")
+	server(addr)
+
+}
+
+func server(address string) {
+	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to listen: %v", err)
 	}
-	defer router.Destroy()
+	defer listener.Close()
 
-	log.Println("router created and bound")
+	log.Printf("listening on %s", address)
 
-	// Create a dealer socket and connect it to the router.
-	dealer, err := goczmq.NewDealer("tcp://127.0.0.1:5555")
-	if err != nil {
-		log.Fatal(err)
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Fatalf("failed to accept: %v", err)
+		}
+
+		go handleConn(conn)
 	}
-	defer dealer.Destroy()
+}
 
-	log.Println("dealer created and connected")
+func handleConn(conn net.Conn) {
+	defer conn.Close()
 
-	// Send a 'Hello' message from the dealer to the router.
-	// Here we send it as a frame ([]byte), with a FlagNone
-	// flag to indicate there are no more frames following.
-	err = dealer.SendFrame([]byte("Hello"), goczmq.FlagNone)
-	if err != nil {
-		log.Fatal(err)
+	for {
+		const bufSize = 1024
+		buf := make([]byte, bufSize)
+
+		n, err := conn.Read(buf)
+		if err != nil {
+			if err == io.EOF {
+				log.Printf("Connection closed by client: %v", conn.RemoteAddr())
+				return
+			}
+			log.Printf("Failed to read from connection: %v", err)
+			return
+		}
+
+		log.Printf("Received %d bytes: %s", n, string(buf[:n]))
 	}
-
-	log.Println("dealer sent 'Hello'")
-
-	// Receive the message. Here we call RecvMessage, which
-	// will return the message as a slice of frames ([][]byte).
-	// Since this is a router socket that support async
-	// request / reply, the first frame of the message will
-	// be the routing frame.
-	request, err := router.RecvMessage()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("router received '%s' from '%v'", request[1], request[0])
-
-	// Send a reply. First we send the routing frame, which
-	// lets the dealer know which client to send the message.
-	// The FlagMore flag tells the router there will be more
-	// frames in this message.
-	err = router.SendFrame(request[0], goczmq.FlagMore)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("router sent 'World'")
-
-	// Next send the reply. The FlagNone flag tells the router
-	// that this is the last frame of the message.
-	err = router.SendFrame([]byte("World"), goczmq.FlagNone)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Receive the reply.
-	reply, err := dealer.RecvMessage()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("dealer received '%s'", string(reply[0]))
 }
