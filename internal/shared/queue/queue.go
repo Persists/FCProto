@@ -2,80 +2,72 @@ package queue
 
 import (
 	"sync"
-
-	"github.com/Persists/fcproto/internal/shared/models"
 )
 
-// the queue is implemented using a linked list
+// Generic Struct
+type Queue[T comparable] struct {
+	head *Node[T]
+	tail *Node[T]
 
-// Queue
-type Queue struct {
-	head *node
-	tail *node
-
-	mu sync.Mutex
+	// Mutual exclusion lock
+	lock sync.Mutex
+	// Cond is used to pause mulitple goroutines and wait
+	cond *sync.Cond
 }
 
-// node
-type node struct {
-	message models.Message
+// Node struct
+type Node[T comparable] struct {
+	value T
 
-	next *node
+	next *Node[T]
 }
 
-// NewQueue creates a new queue
-func NewQueue() *Queue {
-	return &Queue{}
+// Initialize ConcurrentQueue
+func NewQueue[T comparable]() *Queue[T] {
+	q := &Queue[T]{}
+	q.cond = sync.NewCond(&q.lock)
+	return q
 }
 
-// Enqueue adds a message to the queue
-func (q *Queue) Enqueue(msg models.Message) {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-	n := &node{message: msg}
+// Enqueue adds an item to the queue
+func (q *Queue[T]) Enqueue(item T) {
+	q.lock.Lock()
+	defer q.lock.Unlock()
 
-	if q.tail == nil {
-		q.head = n
-		q.tail = n
-		return
-	}
+	// Create a new node
+	node := &Node[T]{value: item}
 
-	q.tail.next = n
-	q.tail = n
-}
-
-// Dequeue removes a message from the queue
-func (q *Queue) Dequeue() (models.Message, bool) {
-	q.mu.Lock()
-	defer q.mu.Unlock()
 	if q.head == nil {
-		return models.Message{}, false
+		q.head = node
+		q.tail = node
+	} else {
+		q.tail.next = node
+		q.tail = node
 	}
 
-	n := q.head
-	q.head = n.next
+	q.cond.Signal()
+}
+
+// Dequeue removes an item from the queue and returns it, it blocks until an item is available
+func (q *Queue[T]) Dequeue() T {
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
+	for q.head == nil {
+		q.cond.Wait()
+	}
+
+	node := q.head
+	q.head = q.head.next
 
 	if q.head == nil {
 		q.tail = nil
 	}
 
-	return n.message, true
+	return node.value
 }
 
 // IsEmpty checks if the queue is empty
-func (q *Queue) IsEmpty() bool {
+func (q *Queue[T]) IsEmpty() bool {
 	return q.head == nil
-}
-
-// Size returns the size of the queue
-func (q *Queue) Size() int {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-	n := q.head
-	size := 0
-	for n != nil {
-		size++
-		n = n.next
-	}
-	return size
 }
