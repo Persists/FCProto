@@ -17,16 +17,15 @@ func TestQueue(t *testing.T) {
 	q.Enqueue(msg1)
 	q.Enqueue(msg2)
 
-	m, ok := q.Peek()
-	if !ok {
-		t.Error("Peek failed")
+	if q.Size() != 2 {
+		t.Errorf("Expected queue size 2, got %d", q.Size())
 	}
 
-	if m != msg1 {
-		t.Errorf("Expected message %v, got %v", msg1, m)
+	if q.IsEmpty() {
+		t.Error("Queue should not be empty")
 	}
 
-	m, ok = q.Dequeue()
+	m, ok := q.Dequeue()
 	if !ok {
 		t.Error("Dequeue failed")
 	}
@@ -60,8 +59,8 @@ func TestQueue(t *testing.T) {
 		t.Errorf("Expected message %v, got %v", msg3, m)
 	}
 
-	_, ok = q.Peek()
-	if ok {
-		t.Error("Peek should have failed")
+	if !q.IsEmpty() {
+		t.Error("Queue should be empty")
 	}
+
 }

@@ -1,6 +1,10 @@
 package queue
 
-import "github.com/Persists/fcproto/internal/shared/models"
+import (
+	"sync"
+
+	"github.com/Persists/fcproto/internal/shared/models"
+)
 
 // the queue is implemented using a linked list
 
@@ -8,6 +12,8 @@ import "github.com/Persists/fcproto/internal/shared/models"
 type Queue struct {
 	head *node
 	tail *node
+
+	mu sync.Mutex
 }
 
 // node
@@ -24,6 +30,8 @@ func NewQueue() *Queue {
 
 // Enqueue adds a message to the queue
 func (q *Queue) Enqueue(msg models.Message) {
+	q.mu.Lock()
+	defer q.mu.Unlock()
 	n := &node{message: msg}
 
 	if q.tail == nil {
@@ -38,6 +46,8 @@ func (q *Queue) Enqueue(msg models.Message) {
 
 // Dequeue removes a message from the queue
 func (q *Queue) Dequeue() (models.Message, bool) {
+	q.mu.Lock()
+	defer q.mu.Unlock()
 	if q.head == nil {
 		return models.Message{}, false
 	}
@@ -52,11 +62,20 @@ func (q *Queue) Dequeue() (models.Message, bool) {
 	return n.message, true
 }
 
-// Peek returns the message at the head of the queue
-func (q *Queue) Peek() (models.Message, bool) {
-	if q.head == nil {
-		return models.Message{}, false
-	}
+// IsEmpty checks if the queue is empty
+func (q *Queue) IsEmpty() bool {
+	return q.head == nil
+}
 
-	return q.head.message, true
+// Size returns the size of the queue
+func (q *Queue) Size() int {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	n := q.head
+	size := 0
+	for n != nil {
+		size++
+		n = n.next
+	}
+	return size
 }
