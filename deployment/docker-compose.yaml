@@ -1,9 +1,27 @@
 services:
+  dbeaver:
+    image: dbeaver/cloudbeaver
+    restart: always
+    ports:
+      - "8978:8978"
+    networks:
+      - server-cloud
+
+  database:
+    image: postgres:16.0
+    restart: always
+    env_file:
+      - ../.cloud.env
+    networks:
+      - server-cloud
+    ports:
+      - "5432:5432"
+
   fog:
     build:
       context: ./..
       dockerfile: deployment/Dockerfile
-    command: ["./fog-server"]
+    command: ["./fog-cloud"]
     networks:
       - fog-cloud
 
@@ -11,12 +29,15 @@ services:
     build:
       context: ./..
       dockerfile: deployment/Dockerfile
-    command: ["./cloud-server"]
+    command: ["./cloud-cloud"]
     networks:
       - fog-cloud
+      - server-cloud
     expose:
       - 5555:5555
 
 networks:
   fog-cloud:
+    driver: bridge
+  server-cloud:
     driver: bridge

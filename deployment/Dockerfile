@@ -23,7 +23,7 @@ ENV GOOS=linux \
 
 # Copy the source code and build the fog binary.
 COPY ../cmd/fog ./cmd/fog
-RUN go build -v -o fog-server ./cmd/fog
+RUN go build -v -o fog-cloud ./cmd/fog
 
 COPY ../cmd/cloud ./cmd/cloud
-RUN go build -v -o cloud-server ./cmd/cloud
+RUN go build -v -o cloud-cloud ./cmd/cloud
