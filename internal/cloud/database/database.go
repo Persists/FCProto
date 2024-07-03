@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/Persists/fcproto/internal/server/database/models"
-	"github.com/Persists/fcproto/internal/server/database/models/entities"
+	"github.com/Persists/fcproto/internal/cloud/database/models"
+	"github.com/Persists/fcproto/internal/cloud/database/models/entities"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
+	"log"
+	"time"
 )
 
 type DB struct {
@@ -18,7 +20,9 @@ type DB struct {
 var ctx = context.Background()
 
 func Connect(env *database_models.PostgresEnv) *DB {
+	fmt.Println(env)
 	sqlDb := sql.OpenDB(pgdriver.NewConnector(
+		pgdriver.WithAddr(env.Addr),
 		pgdriver.WithDatabase(env.Database),
 		pgdriver.WithUser(env.User),
 		pgdriver.WithPassword(env.Password),
@@ -27,26 +31,12 @@ func Connect(env *database_models.PostgresEnv) *DB {
 
 	db := bun.NewDB(sqlDb, pgdialect.New())
 
+	if err := db.Ping(); err != nil {
+		log.Print("Failed to connect to database")
+		log.Fatal(err)
+	}
+
 	return &DB{db}
-}
-
-func (db *DB) CloseConnection() {
-	err := db.Close()
-	if err != nil {
-		fmt.Printf("Unable to close connection to database: %v\n", err)
-	}
-}
-
-func (db *DB) Start() {
-	_, err := db.ExecContext(ctx, `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	err = db.createSchema()
-	if err != nil {
-		fmt.Printf("Error to create Schemas")
-	}
 }
 
 func (db *DB) createSchema() error {
@@ -66,4 +56,21 @@ func (db *DB) createSchema() error {
 		}
 		return nil
 	})
+}
+
+func (db *DB) InsertClient(ipAddr string) (*entities.ClientEntity, error) {
+	client := &entities.ClientEntity{
+		IpAddr:   ipAddr,
+		LastSeen: time.Now(),
+	}
+	_, err := db.NewInsert().
+		Model(client).
+		On("CONFLICT (ip_addr) DO UPDATE").
+		Set("ip_addr = EXCLUDED.ip_addr").
+		Exec(ctx)
+	if err != nil {
+		log.Printf("Failed to insert client into database: %v", err)
+		return nil, err
+	}
+	return client, nil
 }

@@ -1,33 +1,44 @@
-package messages
+package messages_utils
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/Persists/fcproto/internal/cloud/database"
 	"github.com/Persists/fcproto/internal/cloud/database/models/entities"
 	"github.com/Persists/fcproto/internal/shared/models"
+	"github.com/mitchellh/mapstructure"
 	"log"
+	"time"
 )
 
 var ctx = context.Background()
 
-func InsertSensorMessage(data models.SensorMessage, db *database.DB, client *entities.ClientEntity) {
-	formattedContent, err := formatContent(data.Content)
+func InsertSensorMessage(db *database.DB, payload *map[string]interface{}, client *entities.ClientEntity) (err error) {
+	var sensorData models.SensorMessage
+	err = mapstructure.Decode(payload, &sensorData)
+	if err != nil {
+		log.Printf("Failed to decode sensor message: %v", err)
+		return
+	}
+
+	formattedContent, err := formatContent(sensorData.Content)
 	if err != nil {
 		log.Printf("Failed to format content: %v", err)
 		return
 	}
+	formattedTimestamp := time.Unix(sensorData.Timestamp, 0)
 
-	writtenDB, err := db.NewInsert().
+	_, err = db.NewInsert().
 		Model(&entities.SensorMessageEntity{
 			Content:      formattedContent,
 			ClientIpAddr: client.IpAddr,
+			Timestamp:    formattedTimestamp,
 		}).Exec(ctx)
-
-	fmt.Println("Written to DB: ", &writtenDB)
-
-	log.Printf("Received: Timestamp: %d, Content:\n%s", data.Timestamp, formattedContent)
+	if err != nil {
+		log.Printf("Failed to insert sensor message into database: %v", err)
+		return
+	}
+	return nil
 }
 
 func formatContent(content string) (string, error) {

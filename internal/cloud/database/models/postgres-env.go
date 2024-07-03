@@ -1,7 +1,8 @@
 package database_models
 
 type PostgresEnv struct {
-	Password string
+	Addr     string
 	Database string
 	User     string
+	Password string
 }

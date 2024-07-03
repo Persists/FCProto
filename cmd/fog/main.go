@@ -1,48 +1,26 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
-	"net"
 	"time"
-
-	"github.com/Persists/fcproto/internal/shared/models"
-)
-
-const (
-	addr = "localhost:5555"
 )
 
 func main() {
-	sender(addr)
-}
-
-func sender(address string) {
-	conn, err := net.Dial("tcp", address)
+	fogClient := NewFogClient()
+	err := fogClient.Init()
 	if err != nil {
-		log.Fatalf("failed to dial: %v", err)
-	}
-	defer conn.Close()
-
-	log.Printf("connected to %s", address)
-
-	msg := models.Message{
-		Timestamp: time.Now().Unix(),
-
-		Content: "Hello, World!",
+		log.Fatalf("failed to initialize the fog client: %v", err)
 	}
 
-	for i := 0; i < 10; i++ {
-		jsonMsg, err := json.Marshal(msg)
-		if err != nil {
-			log.Fatalf("failed to marshal message: %v", err)
-		}
+	err = fogClient.Start()
+	if err != nil {
+		log.Fatalf("failed to start the fog client: %v", err)
+	}
 
-		n, err := conn.Write([]byte(jsonMsg))
-		if err != nil {
-			log.Fatalf("failed to write to connection: %v", err)
-		}
+	time.Sleep(30 * time.Second)
 
-		log.Printf("sent %d bytes: %s", n, jsonMsg)
+	err = fogClient.Stop()
+	if err != nil {
+		log.Fatalf("failed to stop the fog client: %v", err)
 	}
 }

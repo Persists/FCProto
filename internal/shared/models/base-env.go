@@ -1,5 +1,5 @@
 package models
 
-type Environmental struct {
+type BaseEnv struct {
 	SocketAddr string
 }

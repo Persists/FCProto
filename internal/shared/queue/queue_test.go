@@ -9,11 +9,11 @@ import (
 )
 
 func TestQueueQueuesItems(t *testing.T) {
-	q := queue.NewQueue[models.Message]()
+	q := queue.NewQueue[models.SensorMessage]()
 
-	q.Enqueue(models.Message{Timestamp: 1, Content: "msg1"})
-	q.Enqueue(models.Message{Timestamp: 2, Content: "msg2"})
-	q.Enqueue(models.Message{Timestamp: 3, Content: "msg3"})
+	q.Enqueue(models.SensorMessage{Timestamp: 1, Content: "msg1"})
+	q.Enqueue(models.SensorMessage{Timestamp: 2, Content: "msg2"})
+	q.Enqueue(models.SensorMessage{Timestamp: 3, Content: "msg3"})
 
 	time.Sleep(50 * time.Millisecond)
 
@@ -34,7 +34,7 @@ func TestQueueQueuesItems(t *testing.T) {
 
 	go func() {
 		time.Sleep(50 * time.Millisecond)
-		q.Enqueue(models.Message{Timestamp: 0, Content: ""})
+		q.Enqueue(models.SensorMessage{Timestamp: 0, Content: ""})
 	}()
 
 	item = q.Dequeue()
@@ -44,7 +44,7 @@ func TestQueueQueuesItems(t *testing.T) {
 }
 
 func TestQueueBlockingDequeue(t *testing.T) {
-	q := queue.NewQueue[models.Message]()
+	q := queue.NewQueue[models.SensorMessage]()
 
 	// Channel to signal when Dequeue has returned a value
 	done := make(chan struct{})
@@ -56,7 +56,7 @@ func TestQueueBlockingDequeue(t *testing.T) {
 
 	go func() {
 		time.Sleep(50 * time.Millisecond)
-		q.Enqueue(models.Message{Timestamp: 4, Content: "msg4"})
+		q.Enqueue(models.SensorMessage{Timestamp: 4, Content: "msg4"})
 	}()
 
 	select {
@@ -67,7 +67,7 @@ func TestQueueBlockingDequeue(t *testing.T) {
 }
 
 func TestQueueEnqueueUnblocksDequeue(t *testing.T) {
-	q := queue.NewQueue[models.Message]()
+	q := queue.NewQueue[models.SensorMessage]()
 
 	// Channel to signal when Dequeue has returned a value
 	done := make(chan struct{})
@@ -83,7 +83,7 @@ func TestQueueEnqueueUnblocksDequeue(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 
 	// Enqueue an item which should unblock the Dequeue call
-	q.Enqueue(models.Message{Timestamp: 1, Content: "msg1"})
+	q.Enqueue(models.SensorMessage{Timestamp: 1, Content: "msg1"})
 
 	select {
 	case <-done:
@@ -94,7 +94,7 @@ func TestQueueEnqueueUnblocksDequeue(t *testing.T) {
 }
 
 func TestQueueMultipleBlockingDequeue(t *testing.T) {
-	q := queue.NewQueue[models.Message]()
+	q := queue.NewQueue[models.SensorMessage]()
 
 	// Create channels to signal when Dequeue operations return values
 	done1 := make(chan struct{})
@@ -146,7 +146,7 @@ func TestQueueMultipleBlockingDequeue(t *testing.T) {
 	time.Sleep(50 * time.Millisecond) // Give time for Dequeue to block
 
 	// Enqueue first item, should unblock the first Dequeue
-	q.Enqueue(models.Message{Timestamp: 1, Content: "msg1"})
+	q.Enqueue(models.SensorMessage{Timestamp: 1, Content: "msg1"})
 
 	select {
 	case <-done1:
@@ -184,7 +184,7 @@ func TestQueueMultipleBlockingDequeue(t *testing.T) {
 	}
 
 	// Enqueue second item, should unblock the second Dequeue
-	q.Enqueue(models.Message{Timestamp: 2, Content: "msg2"})
+	q.Enqueue(models.SensorMessage{Timestamp: 2, Content: "msg2"})
 
 	select {
 	case <-done2:
@@ -195,12 +195,12 @@ func TestQueueMultipleBlockingDequeue(t *testing.T) {
 }
 
 func BenchmarkQueueEnqueue(b *testing.B) {
-	q := queue.NewQueue[models.Message]()
+	q := queue.NewQueue[models.SensorMessage]()
 
 	count := 0
 
 	for i := 0; i < b.N; i++ {
-		q.Enqueue(models.Message{Timestamp: int64(i), Content: "msg"})
+		q.Enqueue(models.SensorMessage{Timestamp: int64(i), Content: "msg"})
 
 		count++
 	}

@@ -1,30 +1,37 @@
-package config
+package client_config
 
 import (
 	"github.com/Persists/fcproto/internal/shared/models"
+	"github.com/Persists/fcproto/internal/shared/utils"
 	"github.com/joho/godotenv"
 	"log"
-	"os"
+	"strconv"
 )
 
-func LoadConfig() (*models.BaseEnv, error) {
-	err := godotenv.Load()
+type ClientConfig struct {
+	NotifyAddr string
+	SendPort   int
+
+	*models.BaseEnv
+}
+
+func LoadConfig() (*ClientConfig, error) {
+	err := godotenv.Load(".env", ".fog.env")
 
 	if err != nil {
-		log.Printf("No .env file found, using fallback variables: %v\n", err)
+		log.Printf("No .fog.env file found, using fallback variables: %v\n", err)
 	}
 
-	config := &models.BaseEnv{
-		SocketAddr: getEnv("SOCKET_ADDR", "localhost:5555"),
+	port, err := strconv.Atoi(utils.GetEnv("SEND_PORT", "5557"))
+	if err != nil {
+		log.Printf("Failed to parse SEND_PORT: %v", err)
+	}
+
+	config := &ClientConfig{
+		BaseEnv:    &models.BaseEnv{SocketAddr: utils.GetEnv("SOCKET_ADDR", "localhost:5555")},
+		NotifyAddr: utils.GetEnv("NOTIFY_ADDR", "5556"),
+		SendPort:   port,
 	}
 
 	return config, nil
-}
-
-func getEnv(key, fallback string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		return fallback
-	}
-	return value
 }

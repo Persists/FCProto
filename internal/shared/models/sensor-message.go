@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type Message struct {
+type SensorMessage struct {
 	// timestamp of the message
 	Timestamp int64 `json:"timestamp"`
 
@@ -11,8 +11,8 @@ type Message struct {
 	Content string `json:"content"`
 }
 
-func NewMessage(content string) Message {
-	return Message{
+func NewSensorMessage(content string) SensorMessage {
+	return SensorMessage{
 		Timestamp: time.Now().Unix(),
 		Content:   content,
 	}

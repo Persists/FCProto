@@ -14,7 +14,7 @@ COPY src/cloud ./
 # Build the binary.
 # -o specifies the output file
 # Using CGO_ENABLED=0 to ensure a fully static binary that can run without C dependencies.
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o server
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o cloud
 
 # Use a Docker multi-stage build to create a lean production image.
 # Start with a smaller image without extra layers.
