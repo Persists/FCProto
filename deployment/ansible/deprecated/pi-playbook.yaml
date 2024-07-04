@@ -1,0 +1,21 @@
+- name: Configure and install MicroK8s on Raspberry Pi
+  hosts: microk8s_PIS
+  become: yes
+  tasks:
+    - name: Ensure cgroups are enabled
+      lineinfile:
+        path: /boot/firmware/cmdline.txt
+        regexp: '^(.*)cgroup_enable=memory cgroup_memory=1(.*)$'
+        line: 'cgroup_enable=memory cgroup_memory=1'
+        state: present
+      when: ansible_architecture == "armv7l" or ansible_architecture == "aarch64"
+
+    - name: Reboot the Raspberry Pi to apply cgroup changes
+      reboot:
+        msg: "Rebooting to apply cgroup changes"
+        connect_timeout: 5
+        reboot_timeout: 30
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+        test_command: 'true'
+      when: ansible_architecture == "armv7l" or ansible_architecture == "aarch64"

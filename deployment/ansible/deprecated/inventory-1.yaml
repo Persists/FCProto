@@ -1,0 +1,30 @@
+all:
+  vars:
+    ansible_ssh_private_key_file: ~/.ssh/ansible
+    microk8s_version: 1.30/stable
+
+  children:
+    microk8s_HA:
+      hosts:
+        microk8s-controller:
+
+    microk8s_WORKERS:
+      hosts:
+        microk8s-node1:
+        microk8s-local:
+
+    microk8s_PIS:
+      hosts:
+        microk8s-node1:
+
+  hosts:
+    microk8s-controller:
+      ansible_user: konsumgandalf
+      ansible_host: 192.168.122.15
+    microk8s-node1:
+      ansible_user: pi
+      ansible_host: 192.168.188.35
+    microk8s-local:
+      ansible_user: konsum-gandalf
+      ansible_host: localhost
+      ansible_connection: local

@@ -31,5 +31,6 @@ COPY ../.fog.env ./.fog.env
 
 EXPOSE 5556
 EXPOSE 5557
+EXPOSE 9328
 
 ENTRYPOINT ["./fog"]

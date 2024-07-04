@@ -1,0 +1,28 @@
+all:
+  vars:
+    ansible_ssh_private_key_file: /var/snap/multipass/common/data/multipassd/ssh-keys/id_rsa
+    microk8s_version: 1.30/stable
+    ansible_user: ubuntu
+
+  children:
+    microk8s_HA:
+      hosts:
+        cloud-controller-node:
+
+    microk8s_WORKERS:
+      hosts:
+        intermediate-node-1:
+        intermediate-node-2:
+        edge-node-pi:
+
+  hosts:
+    intermediate-node-1:
+      ansible_host: 10.105.227.175
+    intermediate-node-2:
+      ansible_host: 10.105.227.83
+    edge-node-pi:
+      ansible_host: 192.168.188.35
+      ansible_user: pi
+      ansible_ssh_private_key_file: ~/.ssh/ansible
+    cloud-controller-node:
+      ansible_host: 10.105.227.91
