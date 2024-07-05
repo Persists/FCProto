@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"net"
 	"strings"
 	"testing"
@@ -107,8 +106,6 @@ func TestEstablishConnectionRandomPort(t *testing.T) {
 	if conn == nil {
 		t.Errorf("Expected non-nil but got nil")
 	}
-
-	fmt.Println(conn.LocalAddr().String())
 
 	if strings.Split(conn.LocalAddr().String(), ":")[3] == "8080" {
 		t.Errorf("Expected random port but got 8080")
