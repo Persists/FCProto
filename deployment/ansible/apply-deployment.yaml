@@ -1,0 +1,24 @@
+---
+- name: Deploy Kubernetes resources
+  hosts: microk8s-controller
+  become: yes
+  vars:
+    obj_def_path: /media/konsum-gandalf/data_drive/Programming/TU_Berlin/FC/FCProto/deployment/k8s
+    obj_def_files:
+      - configmap.yaml
+      - database-deployment.yaml
+
+  tasks:
+    - name: Ensure kubectl alias is set
+      command: snap alias microk8s.kubectl kubectl
+      register: kubectl_alias
+      retries: 5
+      delay: 10
+      until: kubectl_alias.rc == 0
+
+    - name: Install all objects
+      loop: "{{ obj_def_files }}"
+      kubernetes.core.k8s:
+        src:  "{{ obj_def_path }}/{{ item }}"
+        state: present
+        apply: true
