@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/Persists/fcproto/internal/client/client-config"
+	"log"
+
+	client_config "github.com/Persists/fcproto/internal/client/client-config"
 	"github.com/Persists/fcproto/internal/shared/sender"
 	"github.com/Persists/fcproto/pkg/sensors"
-	"log"
 )
 
 type FogClient struct {
@@ -42,7 +43,7 @@ func (fc *FogClient) Init() error {
 
 func (fc *FogClient) Start() error {
 	fc.senderManager.Start()
-	fc.sensorManager.SendToReceiver(fc.senderManager)
+	fc.sensorManager.SendToReceiver(fc.senderManager.StopChan, fc.senderManager.Sender.Send)
 
 	return nil
 }
