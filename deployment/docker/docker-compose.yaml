@@ -28,20 +28,11 @@ services:
     depends_on:
       - cloud
     build:
-<<<<<<< HEAD
-      context: ../..
-      target: prod
-      dockerfile: ./deployment/docker/Fog.Dockerfile
-    env_file:
-      - ../../.fog.env
-=======
       context: ./../..
       target: prod
       dockerfile: deployment/docker/Fog.Dockerfile
     env_file:
       - ../../.fog.env
-      - ../../.env
->>>>>>> 3293c89 (fix: docker deployment)
     networks:
       - fog
       - cloud
@@ -54,20 +45,11 @@ services:
     depends_on:
       - database
     build:
-<<<<<<< HEAD
-      context: ../..
-      target: prod
-      dockerfile: ./deployment/docker/Cloud.Dockerfile
-    env_file:
-      - ../../.cloud.env
-=======
       context: ./../..
       target: prod
       dockerfile: deployment/docker/Cloud.Dockerfile
     env_file:
       - ../../.cloud.env
-      - ../../.env
->>>>>>> 3293c89 (fix: docker deployment)
     restart: always
     networks:
       - fog
