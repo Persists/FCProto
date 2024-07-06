@@ -3,11 +3,12 @@ package sender
 import (
 	"encoding/json"
 	"fmt"
-	client_config "github.com/Persists/fcproto/internal/client/client-config"
-	sharedUtils "github.com/Persists/fcproto/internal/shared/utils"
 	"log"
 	"net"
 	"time"
+
+	client_config "github.com/Persists/fcproto/internal/client/client-config"
+	sharedUtils "github.com/Persists/fcproto/internal/shared/utils"
 
 	"github.com/Persists/fcproto/internal/shared/models"
 	"github.com/Persists/fcproto/internal/shared/queue"
@@ -33,6 +34,9 @@ func (s *Sender) Connect() (*net.Conn, error) {
 	maxRetryDelay := 60 * time.Second // Maximum retry delay
 	retries, maxRetries := 0, 1       // Maximum number of retries
 
+	// This implementats an exponential backoff algorithm
+	// when it isnt able to connect to the server it will start hosting a callback port
+	// (callback port: port that the server can connect to when it is ready to accept the connection)
 	for {
 		if retries < maxRetries {
 			conn, err := sharedUtils.EstablishConnection(s.SocketAddr, s.SendPort)
@@ -131,6 +135,8 @@ func (s *Sender) sendInitialHeartbeat() error {
 	return nil
 }
 
+// starts a listener on the default port and returns the connection
+// if the cloud connects to the callback port
 func (s *Sender) startCallbackListener() (conn net.Conn, err error) {
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", s.NotifyPort))
 	if err != nil {
