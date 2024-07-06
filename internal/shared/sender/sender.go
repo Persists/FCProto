@@ -121,8 +121,8 @@ func (s *Sender) writeWithRetry(data []byte) error {
 }
 
 func (s *Sender) sendInitialHeartbeat() error {
-	msg := models.NewMessage(models.Heartbeat, models.NewHeartbeatMessage(s.NotifyAddr))
-	fmt.Println(s.NotifyAddr)
+	msg := models.NewMessage(models.Heartbeat, models.NewHeartbeatMessage(s.NotifyPort))
+	fmt.Println(s.NotifyPort)
 	_, err := sharedUtils.SendMessage(*s.conn, msg)
 	if err != nil {
 		fmt.Printf("Failed to send initial heartbeat: %v", err)
@@ -132,9 +132,9 @@ func (s *Sender) sendInitialHeartbeat() error {
 }
 
 func (s *Sender) startCallbackListener() (conn net.Conn, err error) {
-	listener, err := net.Listen("tcp", "fog:5556")
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", s.NotifyPort))
 	if err != nil {
-		log.Fatalf("Failed to start listener on port %s: %v", s.NotifyAddr, err)
+		log.Fatalf("Failed to start listener on port %s: %v", s.NotifyPort, err)
 	}
 	defer func(listener net.Listener) {
 		closeErr := listener.Close()
@@ -143,7 +143,7 @@ func (s *Sender) startCallbackListener() (conn net.Conn, err error) {
 			err = closeErr
 		}
 	}(listener)
-	log.Printf("Listening on default port %s", s.NotifyAddr)
+	log.Printf("Listening on default port %s", s.NotifyPort)
 
 	conn, err = listener.Accept()
 	if err != nil {

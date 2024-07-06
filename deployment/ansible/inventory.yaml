@@ -1,6 +1,6 @@
 all:
   vars:
-    ansible_ssh_private_key_file: /var/snap/multipass/common/data/multipassd/ssh-keys/id_rsa
+    ansible_ssh_private_key_file: ~/.ssh/multipass # /var/snap/multipass/common/data/multipassd/ssh-keys/id_rsa
     microk8s_version: 1.30/stable
     ansible_user: ubuntu
 
@@ -13,21 +13,21 @@ all:
       hosts:
         intermediate-node-1:
         intermediate-node-2:
-        #edge-node-pi:
-        #cloud-node:
+        edge-node-pi:
+        cloud-node:
 
   hosts:
     intermediate-node-1:
-      ansible_host: 10.105.227.175
+      ansible_host: 10.105.227.222
     intermediate-node-2:
-      ansible_host: 10.105.227.83
-    #edge-node-pi:
-    #  ansible_host: 192.168.188.35
-    #  ansible_user: pi
-    #  ansible_ssh_private_key_file: /home/konsum-gandalf/.ssh/ansible
-    #cloud-node:
-    #  ansible_host: 35.246.157.88
-    #  ansible_ssh_private_key_file: /home/konsum-gandalf/.ssh/ansible
+      ansible_host: 10.105.227.106
+    edge-node-pi:
+      ansible_host: 192.168.188.35
+      ansible_user: pi
+      ansible_ssh_private_key_file: /home/konsum-gandalf/.ssh/ansible
+    cloud-node:
+      ansible_host: 34.141.90.81
+      ansible_ssh_private_key_file: /home/konsum-gandalf/.ssh/ansible
     controller-node:
       ansible_user: konsum-gandalf
       ansible_host: localhost

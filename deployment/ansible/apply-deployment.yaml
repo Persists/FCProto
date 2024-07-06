@@ -16,6 +16,13 @@
       delay: 10
       until: kubectl_alias.rc == 0
 
+    - name: Disable Firewall
+      command: ufw disable
+      register: ufw_disable
+      retries: 5
+      delay: 10
+      until: ufw_disable.rc == 0
+
     - name: Install all objects
       loop: "{{ obj_def_files }}"
       kubernetes.core.k8s:

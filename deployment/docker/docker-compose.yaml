@@ -15,7 +15,7 @@ services:
     image: postgres:16.0
     restart: always
     env_file:
-      - ../.cloud.env
+      - ../../.cloud.env
     networks:
       - cloud
     ports:
@@ -23,17 +23,16 @@ services:
 
   fog:
     container_name: fog
-    image: fog
+    image: codinggandalf/fog-computing:fog
     restart: always
     depends_on:
       - cloud
     build:
-      context: ./..
+      context: ../..
       target: prod
-      dockerfile: deployment/Fog.Dockerfile
+      dockerfile: ./deployment/docker/Fog.Dockerfile
     env_file:
-      - ../.fog.env
-      - ../.env
+      - ../../.fog.env
     networks:
       - fog
       - cloud
@@ -42,16 +41,15 @@ services:
 
   cloud:
     container_name: cloud
-    image: cloud
+    image: codinggandalf/fog-computing:cloud
     depends_on:
       - database
     build:
-      context: ./..
+      context: ../..
       target: prod
-      dockerfile: deployment/Cloud.Dockerfile
+      dockerfile: ./deployment/docker/Cloud.Dockerfile
     env_file:
-      - ../.cloud.env
-      - ../.env
+      - ../../.cloud.env
     restart: always
     networks:
       - fog

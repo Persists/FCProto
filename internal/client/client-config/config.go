@@ -1,6 +1,7 @@
 package client_config
 
 import (
+	"fmt"
 	"github.com/Persists/fcproto/internal/shared/models"
 	"github.com/Persists/fcproto/internal/shared/utils"
 	"github.com/joho/godotenv"
@@ -9,14 +10,14 @@ import (
 )
 
 type ClientConfig struct {
-	NotifyAddr string
+	NotifyPort string
 	SendPort   int
 
 	*models.BaseEnv
 }
 
 func LoadConfig() (*ClientConfig, error) {
-	err := godotenv.Load(".env", ".fog.env")
+	err := godotenv.Load(".fog.env")
 
 	if err != nil {
 		log.Printf("No .fog.env file found, using fallback variables: %v\n", err)
@@ -29,9 +30,10 @@ func LoadConfig() (*ClientConfig, error) {
 
 	config := &ClientConfig{
 		BaseEnv:    &models.BaseEnv{SocketAddr: utils.GetEnv("SOCKET_ADDR", "localhost:5555")},
-		NotifyAddr: utils.GetEnv("NOTIFY_ADDR", "5556"),
+		NotifyPort: utils.GetEnv("NOTIFY_PORT", "5556"),
 		SendPort:   port,
 	}
+	fmt.Printf("config: %v\n", config.BaseEnv)
 
 	return config, nil
 }
