@@ -7,9 +7,14 @@ RUN apt-get update && \
 
 WORKDIR /app
 
+<<<<<<< HEAD
 COPY ../../go.mod ./
 COPY ../../go.sum ./
 
+=======
+COPY ./go.mod ./
+COPY ./go.sum ./
+>>>>>>> 3293c89 (fix: docker deployment)
 RUN go mod download
 
 ENV GOOS=linux \
