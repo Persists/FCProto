@@ -66,11 +66,29 @@ func (db *DB) InsertClient(ipAddr string) (*entities.ClientEntity, error) {
 	_, err := db.NewInsert().
 		Model(client).
 		On("CONFLICT (ip_addr) DO UPDATE").
-		Set("ip_addr = EXCLUDED.ip_addr").
+		Set("last_seen = EXCLUDED.last_seen, notify_addr = EXCLUDED.notify_addr").
 		Exec(ctx)
 	if err != nil {
 		log.Printf("Failed to insert client into database: %v", err)
 		return nil, err
 	}
 	return client, nil
+}
+
+func (db *DB) GetRecentSensorMessages() ([]entities.SensorMessageEntity, error) {
+	var messages []entities.SensorMessageEntity
+	tenMinutesAgo := time.Now().Add(-50 * time.Minute)
+
+	err := db.NewSelect().
+		Model(&messages).
+		Where("timestamp > ?", tenMinutesAgo).
+		Relation("Client").
+		Order("timestamp DESC").
+		Scan(ctx)
+	if err != nil {
+		log.Printf("Failed to get recent sensor messages: %v", err)
+		return nil, err
+	}
+
+	return messages, nil
 }

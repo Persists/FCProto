@@ -3,6 +3,7 @@ package sender
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"time"
@@ -74,6 +75,7 @@ func (s *Sender) Connect() (*net.Conn, error) {
 
 func (s *Sender) Start() {
 	s.routine()
+	go s.printServerMessage()
 }
 
 func (s *Sender) Close() error {
@@ -121,6 +123,27 @@ func (s *Sender) writeWithRetry(data []byte) error {
 			return err
 		}
 		return nil
+	}
+}
+
+func (s *Sender) printServerMessage() {
+	buffer := make([]byte, 4096)
+
+	for {
+		n, err := (*s.conn).Read(buffer)
+		if err != nil {
+			if err == io.EOF {
+				log.Println("Connection closed by server")
+				return
+			}
+			log.Printf("Error reading from connection: %v", err)
+			continue
+		}
+
+		var msg models.Message
+		err = json.Unmarshal(buffer[:n], &msg)
+
+		fmt.Printf("Received message from server - Topic: %s, Payload: %v\n", msg.Topic, msg.Payload)
 	}
 }
 

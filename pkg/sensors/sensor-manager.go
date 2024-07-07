@@ -47,3 +47,8 @@ func (manager *SensorManager) SendToReceiver(stopChan <-chan bool, send func(mod
 		}
 	}()
 }
+
+func (manager *SensorManager) Start(stopChan <-chan bool, send func(models.Message)) {
+	manager.Init()
+	manager.SendToReceiver(stopChan, send)
+}

@@ -20,13 +20,13 @@ import (
 type ConnectionManager struct {
 	listener     net.Listener
 	db           database.DB
-	connections  map[net.Conn]struct{}
+	connections  map[string]net.Conn // Map keys are client IP addresses
 	connectionsM sync.Mutex
 }
 
 // Start and Stop methods for the ConnectionManager
 func (cm *ConnectionManager) Init(config *config.ServerConfig, db database.DB) error {
-	cm.connections = make(map[net.Conn]struct{})
+	cm.connections = make(map[string]net.Conn)
 	cm.db = db
 	listener, err := net.Listen("tcp", config.SocketAddr)
 
@@ -40,6 +40,7 @@ func (cm *ConnectionManager) Init(config *config.ServerConfig, db database.DB) e
 
 func (cm *ConnectionManager) Start() (err error) {
 	messages_utils.NotifyAllClients(&cm.db)
+	cm.StartSensorDataRoutine()
 	for {
 		conn, err := cm.listener.Accept()
 		if err != nil {
@@ -56,7 +57,7 @@ func (cm *ConnectionManager) Start() (err error) {
 		cm.addConnection(conn)
 		go func() {
 			if closeErr := cm.handleConn(conn, client); closeErr != nil {
-				fmt.Printf("Failed to handle connection: %v", err)
+				fmt.Printf("Failed to handle connection: %v", closeErr)
 				err = closeErr
 			}
 		}()
@@ -69,7 +70,7 @@ func (cm *ConnectionManager) Stop() error {
 
 	var errList []error
 
-	for conn := range cm.connections {
+	for _, conn := range cm.connections {
 		if err := conn.Close(); err != nil {
 			log.Printf("Failed to close connection: %v", err)
 			errList = append(errList, err)
@@ -86,6 +87,32 @@ func (cm *ConnectionManager) Stop() error {
 	}
 
 	return nil
+}
+
+func (cm *ConnectionManager) StartSensorDataRoutine() {
+	go func() { // Added missing go routine initialization
+		for {
+			messages, err := cm.db.GetRecentSensorMessages()
+			if err != nil {
+				log.Printf("Error fetching recent sensor messages: %v", err)
+				continue
+			}
+			fmt.Println("Starting sensor data routine")
+
+			cm.connectionsM.Lock()
+			for _, msg := range messages {
+				conn, exists := cm.connections[msg.ClientIpAddr]
+				if exists {
+					sendMsg := models.NewMessage(models.All, models.NewSensorMessage("LOL"))
+					utils.SendMessage(conn, sendMsg)
+				}
+			}
+			cm.connectionsM.Unlock()
+
+			// Wait for a while before checking again
+			time.Sleep(10 * time.Second)
+		}
+	}()
 }
 
 func (cm *ConnectionManager) handleConn(conn net.Conn, client *entities.ClientEntity) (err error) {
@@ -153,11 +180,11 @@ func (cm *ConnectionManager) handleConn(conn net.Conn, client *entities.ClientEn
 func (cm *ConnectionManager) removeConnection(conn net.Conn) {
 	cm.connectionsM.Lock()
 	defer cm.connectionsM.Unlock()
-	delete(cm.connections, conn)
+	delete(cm.connections, conn.RemoteAddr().String())
 }
 
 func (cm *ConnectionManager) addConnection(conn net.Conn) {
 	cm.connectionsM.Lock()
 	defer cm.connectionsM.Unlock()
-	cm.connections[conn] = struct{}{}
+	cm.connections[conn.RemoteAddr().String()] = conn
 }

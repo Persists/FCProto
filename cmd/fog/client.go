@@ -43,7 +43,7 @@ func (fc *FogClient) Init() error {
 
 func (fc *FogClient) Start() error {
 	fc.senderManager.Start()
-	fc.sensorManager.SendToReceiver(fc.senderManager.StopChan, fc.senderManager.Sender.Send)
+	fc.sensorManager.Start(fc.senderManager.StopChan, fc.senderManager.Sender.Send)
 
 	return nil
 }
