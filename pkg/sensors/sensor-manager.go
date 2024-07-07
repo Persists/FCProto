@@ -1,10 +1,10 @@
 package sensors
 
 import (
-	"github.com/Persists/fcproto/internal/shared/models"
-	"github.com/Persists/fcproto/internal/shared/sender"
-	"github.com/Persists/fcproto/internal/shared/utils"
 	"time"
+
+	"github.com/Persists/fcproto/internal/shared/models"
+	"github.com/Persists/fcproto/internal/shared/utils"
 )
 
 type SensorManager struct {
@@ -29,18 +29,21 @@ func (manager *SensorManager) Init() {
 	manager.sensors = append(manager.sensors, NewVirtualSensor())
 }
 
-func (manager *SensorManager) SendToReceiver(sm *sender.SenderManager) {
+func (manager *SensorManager) SendToReceiver(stopChan <-chan bool, send func(models.Message)) {
+
+	dataChan := make(chan string)
+
 	// Start generating data for each sensor
 	for _, sensor := range manager.sensors {
 		go utils.StartTicker(2*time.Second, func() string {
 			return sensor.GenerateData()
-		}, sm.StopChan, sm.DataChan)
+		}, stopChan, dataChan)
 	}
 
 	// Collect and print data for demonstration purposes
 	go func() {
-		for data := range sm.DataChan {
-			sm.Sender.Send(models.NewMessage(models.Sensor, models.NewSensorMessage(data)))
+		for data := range dataChan {
+			send(models.NewMessage(models.Sensor, models.NewSensorMessage(data)))
 		}
 	}()
 }

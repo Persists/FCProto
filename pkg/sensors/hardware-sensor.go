@@ -1,12 +1,14 @@
 package sensors
 
 import (
+	"encoding/json"
 	"fmt"
+	"os/exec"
+	"strings"
+
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
-	"os/exec"
-	"strings"
 )
 
 // HardwareSensor holds the collected system information.
@@ -17,18 +19,30 @@ type HardwareSensor struct {
 	IPAddress string
 }
 
+type HardwareSensorData struct {
+	MemoryAvailable uint64
+	MemoryTotal     uint64
+	MemoryUsed      uint64
+	LoadAverage     string
+	IpAddress       string
+}
+
 func (hs HardwareSensor) GenerateData() (dataString string) {
 	transformedMem := hs.TransformedMemInfo(Megabyte)
-	dataString = fmt.Sprintf(
-		"Memory Total: %d MB\nMemory Available: %d MB\nMemory Used: %d MB\nLoad Average: %.2f %.2f %.2f\nIP Address: %s\n",
-		transformedMem.Total,
-		transformedMem.Available,
-		transformedMem.Used,
-		hs.Load.Load1,
-		hs.Load.Load5,
-		hs.Load.Load15,
-		hs.IPAddress,
-	)
+	data := HardwareSensorData{
+		MemoryAvailable: transformedMem.Available,
+		MemoryTotal:     transformedMem.Total,
+		MemoryUsed:      transformedMem.Used,
+		LoadAverage:     fmt.Sprintf("%.2f %.2f %.2f", hs.Load.Load1, hs.Load.Load5, hs.Load.Load15),
+		IpAddress:       hs.IPAddress,
+	}
+
+	dataBytes, err := json.Marshal(data)
+	if err != nil {
+		dataString = ""
+	} else {
+		dataString = string(dataBytes)
+	}
 	return
 }
 
