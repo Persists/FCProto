@@ -8,7 +8,10 @@ import (
 )
 
 type SensorManager struct {
-	sensors []BaseSensor
+	sensors []struct {
+		Sensor   BaseSensor
+		Interval time.Duration
+	}
 }
 
 func NewSensorManager() *SensorManager {
@@ -16,17 +19,14 @@ func NewSensorManager() *SensorManager {
 }
 
 func (manager *SensorManager) Init() {
-	// Hardware Sensor
-	/*
-		hwSensor, err := sensors.GetSystemInfo()
-		if err != nil {
-			log.Fatalf("Could not get system information for hwSensor %v\n", err)
-		}
-		sensorsArray = append(sensorsArray, hwSensor)
-	*/
-
-	// Virtual Sensor
-	manager.sensors = append(manager.sensors, NewVirtualSensor())
+	manager.sensors = []struct {
+		Sensor   BaseSensor
+		Interval time.Duration
+	}{
+		{Sensor: NewCpuSensor(), Interval: 1 * time.Second},
+		{Sensor: NewMemSensor(), Interval: 2 * time.Second},
+		{Sensor: NewVirtualSensor(), Interval: 3 * time.Second},
+	}
 }
 
 func (manager *SensorManager) SendToReceiver(stopChan <-chan bool, send func(models.Message)) {
@@ -35,8 +35,8 @@ func (manager *SensorManager) SendToReceiver(stopChan <-chan bool, send func(mod
 
 	// Start generating data for each sensor
 	for _, sensor := range manager.sensors {
-		go utils.StartTicker(2*time.Second, func() string {
-			return sensor.GenerateData()
+		go utils.StartTicker(sensor.Interval, func() string {
+			return sensor.Sensor.GenerateData().ToString()
 		}, stopChan, dataChan)
 	}
 

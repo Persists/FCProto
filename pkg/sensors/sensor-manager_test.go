@@ -12,7 +12,15 @@ func TestGenerateDataAtInterval(t *testing.T) {
 	mockSensor := &MockSensor{}
 	mockManager := NewSensorManager()
 
-	mockManager.sensors = append(mockManager.sensors, mockSensor)
+	sensors := []struct {
+		Sensor   BaseSensor
+		Interval time.Duration
+	}{
+		{Sensor: mockSensor, Interval: 1 * time.Second},
+		{Sensor: mockSensor, Interval: 2 * time.Second},
+	}
+
+	mockManager.sensors = append(mockManager.sensors, sensors...)
 
 	sendMessages := []models.Message{}
 
@@ -23,9 +31,8 @@ func TestGenerateDataAtInterval(t *testing.T) {
 	stopChan := make(chan bool)
 
 	mockManager.SendToReceiver(stopChan, send)
-	mockManager.SendToReceiver(stopChan, send)
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(4 * time.Second)
 
 	close(stopChan)
 
@@ -35,13 +42,16 @@ func TestGenerateDataAtInterval(t *testing.T) {
 		t.Errorf("Expected to receive messages but got none")
 	}
 
-	if len(sendMessages) != 4 {
-		t.Errorf("Expected to receive 2 messages but got %d", len(sendMessages))
+	if len(sendMessages) != 6 {
+		t.Errorf("Expected to receive 4 messages but got %d", len(sendMessages))
 	}
 }
 
 type MockSensor struct{}
 
-func (m *MockSensor) GenerateData() string {
-	return "mock data"
+func (m *MockSensor) GenerateData() *BaseSensorData {
+	return &BaseSensorData{
+		Data: "Mock Sensor Data",
+	}
+
 }

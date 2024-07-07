@@ -8,7 +8,7 @@ import (
 func TestVirtualSensor_GenerateData(t *testing.T) {
 	vs := NewVirtualSensor()
 
-	dataString := vs.GenerateData()
+	dataString := vs.GenerateData().ToString()
 	data := &SensorData{}
 
 	err := json.Unmarshal([]byte(dataString), data)
