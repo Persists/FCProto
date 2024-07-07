@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: fog-config
-  namespace: fog-cloud
+  namespace: fog
 data:
   NOTIFY_PORT: "5556"
   SEND_PORT: "5557"
@@ -11,7 +11,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cloud-config
-  namespace: fog-cloud
+  namespace: fog
 data:
   POSTGRES_ADDR: "database:5432"
   POSTGRES_USER: "fog"
@@ -22,6 +22,6 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: config
-  namespace: fog-cloud
+  namespace: fog
 data:
   SOCKET_ADDR: "cloud:5555"

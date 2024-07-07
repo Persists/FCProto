@@ -87,6 +87,7 @@ func NotifyAllClients(db *database.DB) {
 	var clients []entities.ClientEntity
 
 	err := db.NewSelect().
+		DistinctOn("notify_addr").
 		Model(&clients).
 		Column("notify_addr").
 		Where("notify_addr IS NOT NULL").

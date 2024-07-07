@@ -1,31 +1,42 @@
 ---
-- name: Deploy Kubernetes resources
-  hosts: microk8s-controller
+- name: Ensure Python libraries are installed
+  hosts: controller-node
   become: yes
-  vars:
-    obj_def_path: /media/konsum-gandalf/data_drive/Programming/TU_Berlin/FC/FCProto/deployment/k8s
-    obj_def_files:
-      - configmap.yaml
-      - database-deployment.yaml
-
   tasks:
-    - name: Ensure kubectl alias is set
-      command: snap alias microk8s.kubectl kubectl
-      register: kubectl_alias
-      retries: 5
-      delay: 10
-      until: kubectl_alias.rc == 0
-
-    - name: Disable Firewall
-      command: ufw disable
-      register: ufw_disable
-      retries: 5
-      delay: 10
-      until: ufw_disable.rc == 0
-
-    - name: Install all objects
-      loop: "{{ obj_def_files }}"
-      kubernetes.core.k8s:
-        src:  "{{ obj_def_path }}/{{ item }}"
+    - name: Install python3-venv if not present
+      apt:
+        name: python3-venv
         state: present
-        apply: true
+
+    - name: Create a virtual environment
+      command: python3 -m venv /opt/ansible_venv
+      args:
+        creates: /opt/ansible_venv
+
+    - name: Install kubernetes library in the virtual environment
+      command: /opt/ansible_venv/bin/pip install kubernetes
+
+- name: Prepare MicroK8s cluster
+  hosts: controller-node
+  become: yes
+  ignore_errors: yes
+  vars:
+    ansible_python_interpreter: /opt/ansible_venv/bin/python
+  tasks:
+    - name: Check if fog-cloud namespace exists
+      command: microk8s kubectl get namespace fog-cloud
+      register: fog_cloud_namespace
+      ignore_errors: yes
+
+    - name: Create fog-cloud namespace if it does not exist
+      shell: microk8s kubectl create namespace fog-cloud
+      when: fog_cloud_namespace.rc != 0
+
+    - name: Label the edge node
+      command: microk8s kubectl label node ubuntu role=edge --overwrite
+
+    - name: Label the fog nodes
+      command: microk8s kubectl label node intermediate-node-1 intermediate-node-2 role=fog --overwrite
+
+    - name: Label the cloud node
+      command: microk8s kubectl label node cloud-node role=cloud --overwrite

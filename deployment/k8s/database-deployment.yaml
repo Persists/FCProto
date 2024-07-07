@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: database
-  namespace: fog-cloud
+  namespace: fog
 spec:
   replicas: 1
   selector:
@@ -18,7 +18,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
-                  - key: region
+                  - key: role
                     operator: In
                     values:
                       - cloud
@@ -35,7 +35,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: database
-  namespace: fog-cloud
+  namespace: fog
 spec:
   type: LoadBalancer
   selector:

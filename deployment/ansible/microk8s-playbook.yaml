@@ -23,7 +23,7 @@
           helm3: true
 
 - name: Prepare MicroK8s cluster
-  hosts: microk8s-controller
+  hosts: controller-node
   become: yes
   tasks:
     - name: Create fog-cloud namespace

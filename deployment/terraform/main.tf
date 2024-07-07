@@ -1,6 +1,6 @@
 resource "google_compute_instance" "default" {
   name         = var.instance_name
-  machine_type = "e2-small"
+  machine_type = "e2-standard-4"
   zone         = var.zone
 
   boot_disk {
@@ -31,7 +31,7 @@ resource "google_compute_firewall" "allow_microk8s_ingress" {
 
   allow {
     protocol = "tcp"
-    ports    = ["16443", "25000", "12379", "10250", "19001"]
+    ports    = ["16443", "25000", "12379", "10250", "19001", "6443", "5473", "443", "53", "80"]
   }
 
   allow {
@@ -40,7 +40,6 @@ resource "google_compute_firewall" "allow_microk8s_ingress" {
   }
 
   source_ranges = ["0.0.0.0/0"]  # Open to all IPs; modify this to restrict access as needed
-
   target_tags = ["allow-microk8s-ports"]
 }
 

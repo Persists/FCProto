@@ -2,9 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fog
-  namespace: fog-cloud
+  namespace: fog
 spec:
-  replicas: 2
+  replicas: 4
   selector:
     matchLabels:
       app: fog
@@ -18,10 +18,11 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
-                  - key: region
+                  - key: role
                     operator: In
                     values:
                       - fog
+                      - edge
       containers:
         - name: fog
           image: codinggandalf/fog-computing:fog
@@ -37,7 +38,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: fog
-  namespace: fog-cloud
+  namespace: fog
 spec:
   selector:
     app: fog
