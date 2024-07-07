@@ -1,6 +1,10 @@
 package sensors
 
-import "time"
+import (
+	"time"
+
+	"github.com/Persists/fcproto/internal/shared/utils"
+)
 
 type BaseSensor interface {
 	GenerateData() string
@@ -8,14 +12,5 @@ type BaseSensor interface {
 
 // GenerateDataAtInterval generates data at specified intervals and sends it to a channel.
 func GenerateDataAtInterval(vs BaseSensor, interval time.Duration, stopChan <-chan bool, dataChan chan<- string) {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			dataChan <- vs.GenerateData()
-		case <-stopChan:
-			return
-		}
-	}
+	utils.StartTicker(interval, vs.GenerateData, stopChan, dataChan)
 }

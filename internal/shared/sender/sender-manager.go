@@ -1,9 +1,10 @@
 package sender
 
 import (
-	client_config "github.com/Persists/fcproto/internal/client/client-config"
 	"log"
 	"time"
+
+	client_config "github.com/Persists/fcproto/internal/client/client-config"
 )
 
 type SenderManager struct {
@@ -36,11 +37,10 @@ func (sm *SenderManager) Start() {
 }
 
 func (sm *SenderManager) Stop() error {
-	sm.StopChan <- true
+	close(sm.StopChan)
 
 	// Give some time for goroutines to finish
 	time.Sleep(1 * time.Second)
-	close(sm.StopChan)
 	close(sm.DataChan)
 
 	if err := sm.Sender.Close(); err != nil {

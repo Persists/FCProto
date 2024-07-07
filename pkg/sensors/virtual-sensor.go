@@ -1,7 +1,8 @@
 package sensors
 
 import (
-	"fmt"
+	"encoding/json"
+
 	"github.com/jaswdr/faker"
 )
 
@@ -45,10 +46,11 @@ func (vs VirtualSensor) GenerateFakeData() SensorData {
 
 func (vs VirtualSensor) GenerateData() (dataString string) {
 	fakeData := vs.GenerateFakeData()
-	dataString = fmt.Sprintf(
-		"Temperatur: %f Celcius\nHumidity: %f %%\n",
-		fakeData.Temperature,
-		fakeData.Humidity,
-	)
+	dataBytes, err := json.Marshal(fakeData)
+	if err != nil {
+		dataString = ""
+	} else {
+		dataString = string(dataBytes)
+	}
 	return
 }
