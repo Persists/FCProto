@@ -7,15 +7,8 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-<<<<<<< Updated upstream
-COPY ./go.mod ./
-COPY ./go.sum ./
-=======
-
 COPY ../../go.mod ./
 COPY ../../go.sum ./
-
->>>>>>> Stashed changes
 
 RUN go mod download
 

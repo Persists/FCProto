@@ -28,15 +28,9 @@ services:
     # depends_on:
     #   - cloud
     build:
-<<<<<<< Updated upstream
       context: ./../..
       target: prod
       dockerfile: deployment/docker/Fog.Dockerfile
-=======
-      context: ../..
-      target: prod
-      dockerfile: ./deployment/docker/Fog.Dockerfile
->>>>>>> Stashed changes
     env_file:
       - ../../.fog.env
     networks:
@@ -51,15 +45,9 @@ services:
     depends_on:
       - database
     build:
-<<<<<<< Updated upstream
-      context: ./../..
-      target: prod
-      dockerfile: deployment/docker/Cloud.Dockerfile
-=======
       context: ../..
       target: prod
       dockerfile: ./deployment/docker/Cloud.Dockerfile
->>>>>>> Stashed changes
     env_file:
       - ../../.cloud.env
     restart: always
