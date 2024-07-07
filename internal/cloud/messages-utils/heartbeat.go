@@ -11,8 +11,6 @@ import (
 	"strings"
 )
 
-// var startCounter = 0
-
 func UpdateLastSeen(db *database.DB, client *entities.ClientEntity) {
 	_, err := db.NewUpdate().
 		Model(&entities.ClientEntity{}).
@@ -24,24 +22,6 @@ func UpdateLastSeen(db *database.DB, client *entities.ClientEntity) {
 		log.Printf("Failed to update last seen: %v", err)
 	}
 }
-
-/*
-func UpdateLastSeen(db *database.DB, payload *map[string]interface{}, client *entities.ClientEntity) {
-	if startCounter == 0 {
-		updateCallbackAddr(db, payload, client)
-		startCounter++
-	}
-
-	_, err := db.NewUpdate().
-		Model(&entities.ClientEntity{}).
-		Where("ip_addr = ?", client.IpAddr).
-		Set("last_seen = NOW()").
-		Exec(ctx)
-
-	if err != nil {
-		log.Printf("Failed to update last seen: %v", err)
-	}
-}*/
 
 func UpdateNotifyAddr(db *database.DB, payload *map[string]interface{}, client *entities.ClientEntity) error {
 	var heartbeatData models.HeartbeatMessage
