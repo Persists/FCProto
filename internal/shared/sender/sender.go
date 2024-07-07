@@ -1,6 +1,7 @@
 package sender
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -73,9 +74,9 @@ func (s *Sender) Connect() (*net.Conn, error) {
 	}
 }
 
-func (s *Sender) Start() {
+func (s *Sender) Start(StopChan chan bool) {
 	s.routine()
-	go s.printServerMessage()
+	s.printServerMessage(StopChan)
 }
 
 func (s *Sender) Close() error {
@@ -126,25 +127,30 @@ func (s *Sender) writeWithRetry(data []byte) error {
 	}
 }
 
-func (s *Sender) printServerMessage() {
-	buffer := make([]byte, 4096)
+func (s *Sender) printServerMessage(stopChan chan bool) {
+	go func() {
+		reader := bufio.NewReader(*s.conn)
+		decoder := json.NewDecoder(reader)
 
-	for {
-		n, err := (*s.conn).Read(buffer)
-		if err != nil {
-			if err == io.EOF {
-				log.Println("Connection closed by server")
+		for {
+			select {
+			case <-stopChan:
 				return
+			default:
+				var msg models.Message
+				err := decoder.Decode(&msg)
+				if err != nil {
+					if err == io.EOF {
+						log.Println("Connection closed by server")
+						return
+					}
+					log.Printf("Error decoding JSON: %v", err)
+					continue
+				}
+				fmt.Printf("Received message from server - Topic: %s, Payload: %v\n", msg.Topic, msg.Payload)
 			}
-			log.Printf("Error reading from connection: %v", err)
-			continue
 		}
-
-		var msg models.Message
-		err = json.Unmarshal(buffer[:n], &msg)
-
-		fmt.Printf("Received message from server - Topic: %s, Payload: %v\n", msg.Topic, msg.Payload)
-	}
+	}()
 }
 
 func (s *Sender) sendInitialHeartbeat() error {

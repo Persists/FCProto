@@ -1,6 +1,7 @@
 package connection
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"github.com/Persists/fcproto/internal/cloud/config"
@@ -131,9 +132,12 @@ func (cm *ConnectionManager) handleConn(conn net.Conn, client *entities.ClientEn
 		return nil
 	}, stopTickerChan, nil)
 
-	buf := make([]byte, 4096)
+	reader := bufio.NewReader(conn)
+	decoder := json.NewDecoder(reader)
+
 	for {
-		n, err := conn.Read(buf)
+		var message models.Message
+		err := decoder.Decode(&message)
 		if err != nil {
 			if err == io.EOF {
 				log.Printf("Connection closed by client: %v", conn.RemoteAddr())
@@ -141,22 +145,7 @@ func (cm *ConnectionManager) handleConn(conn net.Conn, client *entities.ClientEn
 				close(stopTickerChan)
 				return err
 			}
-			log.Printf("Failed to read from connection: %v", err)
-			stopTickerChan <- true
-			close(stopTickerChan)
-			return err
-		}
-
-		if err != nil {
-			log.Printf("Failed to insert data into database: %v", err)
-			return err
-		}
-
-		var message models.Message
-		fmt.Println("Received data: ", n)
-		err = json.Unmarshal(buf[:n], &message)
-		if err != nil {
-			log.Printf("Failed to unmarshal JSON: %v", err)
+			log.Printf("Failed to decode JSON: %v", err)
 			continue
 		}
 

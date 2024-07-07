@@ -33,7 +33,7 @@ func (sm *SenderManager) Init(config *client_config.ClientConfig) error {
 }
 
 func (sm *SenderManager) Start() {
-	sm.Sender.Start()
+	sm.Sender.Start(sm.StopChan)
 }
 
 func (sm *SenderManager) Stop() error {
