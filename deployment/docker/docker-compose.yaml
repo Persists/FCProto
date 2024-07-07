@@ -1,0 +1,76 @@
+name: fog-cloud
+
+services:
+  dbeaver:
+    image: dbeaver/cloudbeaver
+    depends_on:
+      - database
+    restart: always
+    ports:
+      - "8978:8978"
+    networks:
+      - cloud
+
+  database:
+    image: postgres:16.0
+    restart: always
+    env_file:
+      - ../../.cloud.env
+    networks:
+      - cloud
+    ports:
+      - "5432:5432"
+
+  fog:
+    container_name: fog
+    image: codinggandalf/fog-computing:fog
+    restart: always
+    # depends_on:
+    #   - cloud
+    build:
+<<<<<<< Updated upstream
+      context: ./../..
+      target: prod
+      dockerfile: deployment/docker/Fog.Dockerfile
+=======
+      context: ../..
+      target: prod
+      dockerfile: ./deployment/docker/Fog.Dockerfile
+>>>>>>> Stashed changes
+    env_file:
+      - ../../.fog.env
+    networks:
+      - fog
+      - cloud
+    ports:
+      - "5556:5556"
+
+  cloud:
+    container_name: cloud
+    image: codinggandalf/fog-computing:cloud
+    depends_on:
+      - database
+    build:
+<<<<<<< Updated upstream
+      context: ./../..
+      target: prod
+      dockerfile: deployment/docker/Cloud.Dockerfile
+=======
+      context: ../..
+      target: prod
+      dockerfile: ./deployment/docker/Cloud.Dockerfile
+>>>>>>> Stashed changes
+    env_file:
+      - ../../.cloud.env
+    restart: always
+    networks:
+      - fog
+      - cloud
+    ports:
+      - "5555:5555"
+
+networks:
+  fog:
+    driver: bridge
+  cloud:
+    driver: bridge

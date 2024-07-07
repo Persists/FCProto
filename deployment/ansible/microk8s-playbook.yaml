@@ -1,0 +1,64 @@
+- name: Prepare nodes for MicroK8s installation
+  hosts: all
+  become: yes
+  tasks:
+    - name: Disable Firewall
+      command: ufw disable
+      register: ufw_disable
+      retries: 5
+      delay: 10
+      until: ufw_disable.rc == 0
+
+- hosts: all
+  roles:
+    - role: 'istvano.microk8s'
+      vars:
+        microk8s_plugins:
+          dns: "1.1.1.1"
+          ingress: true
+          metrics-server: false
+          cert-manager: true
+          openebs: true
+          portainer: true
+          helm3: true
+
+- name: Prepare MicroK8s cluster
+  hosts: controller-node
+  become: yes
+  tasks:
+    - name: Create fog-cloud namespace
+      k8s:
+        api_version: v1
+        kind: Namespace
+        name: fog-cloud
+        state: present
+
+    - name: Label the edge node
+      k8s:
+        api_version: v1
+        kind: Node
+        name: edge-node-pi
+        labels:
+          role: edge
+        state: present
+      when: inventory_hostname == 'edge-node-pi'
+
+    - name: Label the fog nodes
+      k8s:
+        api_version: v1
+        kind: Node
+        name: "{{ inventory_hostname }}"
+        labels:
+          role: fog
+        state: present
+      when: inventory_hostname in ['intermediate-node-1', 'intermediate-node-2']
+
+    - name: Label the cloud node
+      k8s:
+        api_version: v1
+        kind: Node
+        name: cloud-node
+        labels:
+          role: cloud
+        state: present
+      when: inventory_hostname == 'cloud-node'

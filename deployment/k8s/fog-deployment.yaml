@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fog
+  namespace: fog
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: fog
+  template:
+    metadata:
+      labels:
+        app: fog
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: role
+                    operator: In
+                    values:
+                      - fog
+                      - edge
+      containers:
+        - name: fog
+          image: codinggandalf/fog-computing:fog
+          ports:
+            - containerPort: 5556
+          envFrom:
+            - configMapRef:
+                name: fog-config
+            - configMapRef:
+                name: config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fog
+  namespace: fog
+spec:
+  selector:
+    app: fog
+  ports:
+    - protocol: TCP
+      port: 5556
+      targetPort: 5556

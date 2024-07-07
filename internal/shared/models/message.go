@@ -1,10 +1,25 @@
 package models
 
-type Message struct {
-	// timestamp of the message
-	Timestamp int64 `json:"timestamp"`
+import "github.com/fatih/structs"
 
-	// message content
-	// TODO: expand the content to include more fields
-	Content string `json:"content"`
+type MessageTopic string
+
+const (
+	All       MessageTopic = "all"
+	Heartbeat MessageTopic = "heartbeat"
+	Sensor    MessageTopic = "sensor"
+)
+
+type Message struct {
+	Topic   MessageTopic            `json:"topic"`
+	Payload *map[string]interface{} `json:"payload"`
+}
+
+func NewMessage(topic MessageTopic, payload any) Message {
+	formatedPayload := structs.Map(payload)
+
+	return Message{
+		Topic:   topic,
+		Payload: &formatedPayload,
+	}
 }

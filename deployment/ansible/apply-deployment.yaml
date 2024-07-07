@@ -1,0 +1,42 @@
+---
+- name: Ensure Python libraries are installed
+  hosts: controller-node
+  become: yes
+  tasks:
+    - name: Install python3-venv if not present
+      apt:
+        name: python3-venv
+        state: present
+
+    - name: Create a virtual environment
+      command: python3 -m venv /opt/ansible_venv
+      args:
+        creates: /opt/ansible_venv
+
+    - name: Install kubernetes library in the virtual environment
+      command: /opt/ansible_venv/bin/pip install kubernetes
+
+- name: Prepare MicroK8s cluster
+  hosts: controller-node
+  become: yes
+  ignore_errors: yes
+  vars:
+    ansible_python_interpreter: /opt/ansible_venv/bin/python
+  tasks:
+    - name: Check if fog-cloud namespace exists
+      command: microk8s kubectl get namespace fog-cloud
+      register: fog_cloud_namespace
+      ignore_errors: yes
+
+    - name: Create fog-cloud namespace if it does not exist
+      shell: microk8s kubectl create namespace fog-cloud
+      when: fog_cloud_namespace.rc != 0
+
+    - name: Label the edge node
+      command: microk8s kubectl label node ubuntu role=edge --overwrite
+
+    - name: Label the fog nodes
+      command: microk8s kubectl label node intermediate-node-1 intermediate-node-2 role=fog --overwrite
+
+    - name: Label the cloud node
+      command: microk8s kubectl label node cloud-node role=cloud --overwrite
