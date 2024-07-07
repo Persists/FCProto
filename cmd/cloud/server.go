@@ -4,19 +4,22 @@ import (
 	"github.com/Persists/fcproto/internal/cloud/config"
 	"github.com/Persists/fcproto/internal/cloud/connection"
 	"github.com/Persists/fcproto/internal/cloud/database"
+	"github.com/Persists/fcproto/internal/shared/sender"
 	"log"
 )
 
 type Server struct {
-	connMgr      *connection.ConnectionManager
-	dbm          *database.DatabaseManager
-	serverConfig *config.ServerConfig
+	connMgr       *connection.ConnectionManager
+	dbm           *database.DatabaseManager
+	serverConfig  *config.ServerConfig
+	senderManager *sender.SenderManager
 }
 
 func NewServer() *Server {
 	return &Server{
-		connMgr: &connection.ConnectionManager{},
-		dbm:     &database.DatabaseManager{},
+		connMgr:       &connection.ConnectionManager{},
+		dbm:           &database.DatabaseManager{},
+		senderManager: sender.NewSenderManager(),
 	}
 }
 
@@ -54,6 +57,8 @@ func (s *Server) Start() error {
 		log.Printf("failed to start the connection manager: %v", err)
 		return err
 	}
+
+	s.senderManager.Start()
 
 	return nil
 }
