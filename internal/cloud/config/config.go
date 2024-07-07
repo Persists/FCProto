@@ -14,14 +14,14 @@ type ServerConfig struct {
 }
 
 func LoadConfig() (*ServerConfig, error) {
-	err := godotenv.Load(".env", ".cloud.env")
+	err := godotenv.Load(".cloud.env")
 
 	if err != nil {
 		log.Printf("No .cloud.env file found, using fallback variables: %v\n", err)
 	}
 
 	baseEnv := &models.BaseEnv{
-		SocketAddr: utils.GetEnv("SOCKET_ADDR", "localhost:5555"),
+		SocketAddr: utils.GetEnv("SOCKET_ADDR", ":5555"),
 	}
 
 	postgresEnv := &database_models.PostgresEnv{

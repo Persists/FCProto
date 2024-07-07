@@ -1,15 +1,14 @@
-package queue_test
+package queue
 
 import (
 	"testing"
 	"time"
 
 	"github.com/Persists/fcproto/internal/shared/models"
-	"github.com/Persists/fcproto/internal/shared/queue"
 )
 
 func TestQueueQueuesItems(t *testing.T) {
-	q := queue.NewQueue[models.SensorMessage]()
+	q := NewQueue[models.SensorMessage]()
 
 	q.Enqueue(models.SensorMessage{Timestamp: 1, Content: "msg1"})
 	q.Enqueue(models.SensorMessage{Timestamp: 2, Content: "msg2"})
@@ -44,7 +43,7 @@ func TestQueueQueuesItems(t *testing.T) {
 }
 
 func TestQueueBlockingDequeue(t *testing.T) {
-	q := queue.NewQueue[models.SensorMessage]()
+	q := NewQueue[models.SensorMessage]()
 
 	// Channel to signal when Dequeue has returned a value
 	done := make(chan struct{})
@@ -67,7 +66,7 @@ func TestQueueBlockingDequeue(t *testing.T) {
 }
 
 func TestQueueEnqueueUnblocksDequeue(t *testing.T) {
-	q := queue.NewQueue[models.SensorMessage]()
+	q := NewQueue[models.SensorMessage]()
 
 	// Channel to signal when Dequeue has returned a value
 	done := make(chan struct{})
@@ -94,7 +93,7 @@ func TestQueueEnqueueUnblocksDequeue(t *testing.T) {
 }
 
 func BenchmarkQueueEnqueue(b *testing.B) {
-	q := queue.NewQueue[models.SensorMessage]()
+	q := NewQueue[models.SensorMessage]()
 
 	count := 0
 

@@ -7,15 +7,22 @@ RUN apt-get update && \
 
 WORKDIR /app
 
+<<<<<<< Updated upstream
 COPY ./go.mod ./
 COPY ./go.sum ./
+=======
+
+COPY ../../go.mod ./
+COPY ../../go.sum ./
+
+>>>>>>> Stashed changes
 
 RUN go mod download
 
 ENV GOOS=linux \
     GOARCH=amd64
 
-COPY ../. ./
+COPY ../.. ./
 RUN go build -o /app/fog ./cmd/fog/main.go ./cmd/fog/client.go
 
 FROM debian:12.6-slim as prod
@@ -26,11 +33,6 @@ WORKDIR /app
 
 COPY --from=builder /app/fog ./fog
 
-COPY ../.env ./.env
-COPY ../.fog.env ./.fog.env
-
 EXPOSE 5556
-EXPOSE 5557
-EXPOSE 9328
 
 ENTRYPOINT ["./fog"]

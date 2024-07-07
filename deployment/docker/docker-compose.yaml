@@ -23,17 +23,22 @@ services:
 
   fog:
     container_name: fog
-    image: fog
+    image: codinggandalf/fog-computing:fog
     restart: always
-    depends_on:
-      - cloud
+    # depends_on:
+    #   - cloud
     build:
+<<<<<<< Updated upstream
       context: ./../..
       target: prod
       dockerfile: deployment/docker/Fog.Dockerfile
+=======
+      context: ../..
+      target: prod
+      dockerfile: ./deployment/docker/Fog.Dockerfile
+>>>>>>> Stashed changes
     env_file:
       - ../../.fog.env
-      - ../../.env
     networks:
       - fog
       - cloud
@@ -42,16 +47,21 @@ services:
 
   cloud:
     container_name: cloud
-    image: cloud
+    image: codinggandalf/fog-computing:cloud
     depends_on:
       - database
     build:
+<<<<<<< Updated upstream
       context: ./../..
       target: prod
       dockerfile: deployment/docker/Cloud.Dockerfile
+=======
+      context: ../..
+      target: prod
+      dockerfile: ./deployment/docker/Cloud.Dockerfile
+>>>>>>> Stashed changes
     env_file:
       - ../../.cloud.env
-      - ../../.env
     restart: always
     networks:
       - fog

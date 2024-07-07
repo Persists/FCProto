@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud
+  namespace: fog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud
+  template:
+    metadata:
+      labels:
+        app: cloud
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: role
+                    operator: In
+                    values:
+                      - cloud
+      containers:
+        - name: cloud
+          image: codinggandalf/fog-computing:cloud
+          ports:
+            - containerPort: 5555
+          env:
+            - name: SOCKET_ADDR
+              value: ":5555"
+          envFrom:
+            - configMapRef:
+                name: cloud-config
+          #livenessProbe:
+          #  tcpSocket:
+          #    port: 5555
+          #  initialDelaySeconds: 5
+          #  periodSeconds: 5
+          #readinessProbe:
+          #  tcpSocket:
+          #    port: 5555
+          #  initialDelaySeconds: 10
+          #  periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud
+  namespace: fog
+spec:
+  selector:
+    app: cloud
+  ports:
+    - protocol: TCP
+      port: 5555
+      targetPort: 5555
