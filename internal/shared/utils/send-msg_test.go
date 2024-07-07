@@ -86,8 +86,11 @@ func TestEstablishConnection(t *testing.T) {
 		t.Errorf("Expected non-nil but got nil")
 	}
 
-	if strings.Split(conn.LocalAddr().String(), ":")[3] != "8081" {
-		t.Errorf("Expected 8081 but got %v", strings.Split(conn.LocalAddr().String(), ":")[3])
+	splitted := strings.Split(conn.LocalAddr().String(), ":")
+	port := splitted[len(splitted)-1]
+
+	if port != "8081" {
+		t.Errorf("Expected 8081 but got %s", port)
 	}
 }
 
@@ -107,7 +110,10 @@ func TestEstablishConnectionRandomPort(t *testing.T) {
 		t.Errorf("Expected non-nil but got nil")
 	}
 
-	if strings.Split(conn.LocalAddr().String(), ":")[3] == "8080" {
-		t.Errorf("Expected random port but got 8080")
+	splitted := strings.Split(conn.LocalAddr().String(), ":")
+	port := splitted[len(splitted)-1]
+
+	if port == "8080" {
+		t.Errorf("Expected random port but got %s", port)
 	}
 }
