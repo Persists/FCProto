@@ -4,13 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/Persists/fcproto/internal/cloud/database/models"
+	"log"
+	"time"
+
+	database_models "github.com/Persists/fcproto/internal/cloud/database/models"
 	"github.com/Persists/fcproto/internal/cloud/database/models/entities"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
-	"log"
-	"time"
 )
 
 type DB struct {
@@ -20,7 +21,6 @@ type DB struct {
 var ctx = context.Background()
 
 func Connect(env *database_models.PostgresEnv) *DB {
-	fmt.Println(env)
 	sqlDb := sql.OpenDB(pgdriver.NewConnector(
 		pgdriver.WithAddr(env.Addr),
 		pgdriver.WithDatabase(env.Database),
@@ -47,12 +47,11 @@ func (db *DB) createSchema() error {
 
 	return db.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		for _, model := range models {
-			c, err := tx.NewCreateTable().Model(model).IfNotExists().Exec(ctx)
+			_, err := tx.NewCreateTable().Model(model).IfNotExists().Exec(ctx)
 			if err != nil {
 				fmt.Println(err)
 				return err
 			}
-			fmt.Println(c)
 		}
 		return nil
 	})
@@ -66,11 +65,29 @@ func (db *DB) InsertClient(ipAddr string) (*entities.ClientEntity, error) {
 	_, err := db.NewInsert().
 		Model(client).
 		On("CONFLICT (ip_addr) DO UPDATE").
-		Set("ip_addr = EXCLUDED.ip_addr").
+		Set("last_seen = EXCLUDED.last_seen, notify_addr = EXCLUDED.notify_addr").
 		Exec(ctx)
 	if err != nil {
 		log.Printf("Failed to insert client into database: %v", err)
 		return nil, err
 	}
 	return client, nil
+}
+
+func (db *DB) GetRecentSensorMessages() ([]entities.SensorMessageEntity, error) {
+	var messages []entities.SensorMessageEntity
+	tenMinutesAgo := time.Now().Add(-2 * time.Minute)
+
+	err := db.NewSelect().
+		Model(&messages).
+		Where("timestamp > ?", tenMinutesAgo).
+		Relation("Client").
+		Order("timestamp DESC").
+		Scan(ctx)
+	if err != nil {
+		log.Printf("Failed to get recent sensor messages: %v", err)
+		return nil, err
+	}
+
+	return messages, nil
 }

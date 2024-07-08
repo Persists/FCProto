@@ -8,7 +8,7 @@ import (
 )
 
 func TestQueueQueuesItems(t *testing.T) {
-	q := NewQueue[models.SensorMessage]()
+	q := New[models.SensorMessage]()
 
 	q.Enqueue(models.SensorMessage{Timestamp: 1, Content: "msg1"})
 	q.Enqueue(models.SensorMessage{Timestamp: 2, Content: "msg2"})
@@ -43,7 +43,7 @@ func TestQueueQueuesItems(t *testing.T) {
 }
 
 func TestQueueBlockingDequeue(t *testing.T) {
-	q := NewQueue[models.SensorMessage]()
+	q := New[models.SensorMessage]()
 
 	// Channel to signal when Dequeue has returned a value
 	done := make(chan struct{})
@@ -66,7 +66,7 @@ func TestQueueBlockingDequeue(t *testing.T) {
 }
 
 func TestQueueEnqueueUnblocksDequeue(t *testing.T) {
-	q := NewQueue[models.SensorMessage]()
+	q := New[models.SensorMessage]()
 
 	// Channel to signal when Dequeue has returned a value
 	done := make(chan struct{})
@@ -93,7 +93,7 @@ func TestQueueEnqueueUnblocksDequeue(t *testing.T) {
 }
 
 func BenchmarkQueueEnqueue(b *testing.B) {
-	q := NewQueue[models.SensorMessage]()
+	q := New[models.SensorMessage]()
 
 	count := 0
 

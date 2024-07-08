@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"log"
 	"time"
 )
 
@@ -15,7 +14,6 @@ func StartTicker[T any](interval time.Duration, tickFunc func() T, stopTickerCha
 		case <-ticker.C:
 			dataTickerChan <- tickFunc()
 		case <-stopTickerChan:
-			log.Println("Stopping ticker")
 			return
 		}
 	}

@@ -16,7 +16,7 @@ ENV GOOS=linux \
     GOARCH=amd64
 
 COPY ../.. ./
-RUN go build -o /app/cloud ./cmd/cloud/main.go ./cmd/cloud/server.go
+RUN go build -o /app/cloud ./cmd/cloud/main.go
 
 FROM debian:12.6-slim as prod
 

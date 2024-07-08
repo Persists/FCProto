@@ -16,7 +16,7 @@ ENV GOOS=linux \
     GOARCH=amd64
 
 COPY ../.. ./
-RUN go build -o /app/fog ./cmd/fog/main.go ./cmd/fog/client.go
+RUN go build -o /app/fog ./cmd/fog/main.go
 
 FROM debian:12.6-slim as prod
 

@@ -23,7 +23,7 @@ type Node[T comparable] struct {
 }
 
 // Initialize ConcurrentQueue
-func NewQueue[T comparable]() *Queue[T] {
+func New[T comparable]() *Queue[T] {
 	q := &Queue[T]{}
 	q.cond = sync.NewCond(&q.lock)
 	return q
@@ -65,6 +65,18 @@ func (q *Queue[T]) Dequeue() T {
 	}
 
 	return node.value
+}
+
+func (q *Queue[T]) Len() int {
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
+	len := 0
+	for node := q.head; node != nil; node = node.next {
+		len++
+	}
+
+	return len
 }
 
 // IsEmpty checks if the queue is empty
