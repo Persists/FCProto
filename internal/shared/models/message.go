@@ -10,6 +10,7 @@ const (
 	Sensor    MessageTopic = "sensor"
 	Fog       MessageTopic = "fog"
 	Cloud     MessageTopic = "cloud"
+	Analysis  MessageTopic = "Analysis"
 )
 
 type Message struct {

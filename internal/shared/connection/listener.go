@@ -96,3 +96,11 @@ func (lc *ListenerClient) BroadcastMsg(msg models.Message) {
 		cc.Send(msg)
 	}
 }
+
+func (lc *ListenerClient) GetAllIPs() []string {
+	var ips []string
+	for ip := range lc.Connections {
+		ips = append(ips, ip)
+	}
+	return ips
+}

@@ -47,13 +47,11 @@ func (db *DB) createSchema() error {
 
 	return db.RunInTx(ctx, &sql.TxOptions{}, func(ctx context.Context, tx bun.Tx) error {
 		for _, model := range models {
-			c, err := tx.NewCreateTable().Model(model).IfNotExists().Exec(ctx)
+			_, err := tx.NewCreateTable().Model(model).IfNotExists().Exec(ctx)
 			if err != nil {
 				fmt.Println(err)
 				return err
 			}
-			fmt.Println("schema created")
-			fmt.Println(c)
 		}
 		return nil
 	})
@@ -78,7 +76,7 @@ func (db *DB) InsertClient(ipAddr string) (*entities.ClientEntity, error) {
 
 func (db *DB) GetRecentSensorMessages() ([]entities.SensorMessageEntity, error) {
 	var messages []entities.SensorMessageEntity
-	tenMinutesAgo := time.Now().Add(-50 * time.Minute)
+	tenMinutesAgo := time.Now().Add(-2 * time.Minute)
 
 	err := db.NewSelect().
 		Model(&messages).

@@ -39,10 +39,6 @@ func (cc *CloudClient) Start() error {
 		log.Printf("Failed to start database client: %v", err)
 	}
 
-	db := cc.dbc.GetDB()
-	recentMsg, _ := database.GetRecentSensorMessages(&db)
-	sensors.SortMessageData(recentMsg)
-
 	cc.lc = connection.Listen(cc.socketAddress, cc.onReceive)
 
 	cc.StartInformer()
@@ -55,10 +51,7 @@ func (cc *CloudClient) Init(config *config.ServerConfig) error {
 	cc.dbc = database.NewClient()
 	cc.socketAddress = config.SocketAddr
 
-	err := cc.dbc.Init(config)
-	if err != nil {
-		return err
-	}
+	cc.dbc.Init(config)
 
 	return nil
 }
@@ -66,7 +59,7 @@ func (cc *CloudClient) Init(config *config.ServerConfig) error {
 func (cc *CloudClient) StartInformer() {
 	go func() {
 		for {
-			time.Sleep(5 * time.Second)
+			time.Sleep(30 * time.Second)
 			cc.InformFog()
 		}
 	}()
@@ -74,9 +67,50 @@ func (cc *CloudClient) StartInformer() {
 }
 
 func (cc *CloudClient) InformFog() {
-	message := models.Message{
-		Topic:   models.Fog,
-		Payload: &map[string]interface{}{"message": "Hello Fog!"},
+	db := cc.dbc.GetDB()
+	for ip, conn := range cc.lc.Connections {
+		sensorData, err := database.GetRecentSensorMessages(&db, ip)
+
+		if err != nil {
+			log.Printf("Failed to get recent sensor messages: %v", err)
+			continue
+		}
+
+		VSD, MSD := sensors.MapMessageData(sensorData)
+
+		mappedVSD := make([]float64, len(VSD))
+		for i, data := range VSD {
+			mappedVSD[i] = data.Temperature
+		}
+
+		mappedMSD := make([]float64, len(MSD))
+		for i, data := range MSD {
+			mappedMSD[i] = float64(data.Total)
+		}
+
+		avgVSD, devVSD, meanVSD, minVSD, maxVSD := sensors.Analyse(mappedVSD)
+		avgMSD, devMSD, meanMSD, minMSD, maxMSD := sensors.Analyse(mappedMSD)
+
+		payload := models.AnalysisPayload{
+			VirtualSensorData: models.AnalysisVirtualSensorData{
+				Average:   avgVSD,
+				Deviation: devVSD,
+				Mean:      meanVSD,
+				Min:       minVSD,
+				Max:       maxVSD,
+			},
+			MemorySensorData: models.AnalysisMemorySensorData{
+				Average:   avgMSD,
+				Deviation: devMSD,
+				Mean:      meanMSD,
+				Min:       minMSD,
+				Max:       maxMSD,
+			},
+		}
+
+		msg := models.NewMessage(models.Analysis, payload)
+
+		conn.Send(msg)
+
 	}
-	cc.lc.BroadcastMsg(message)
 }

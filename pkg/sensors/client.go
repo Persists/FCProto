@@ -24,8 +24,8 @@ func (sc *SensorClient) Init() {
 		Interval time.Duration
 	}{
 		{Sensor: NewCpuSensor(), Interval: 10 * time.Second},
-		{Sensor: NewMemSensor(), Interval: 20 * time.Second},
-		{Sensor: NewVirtualSensor(), Interval: 30 * time.Second},
+		{Sensor: NewMemSensor(), Interval: 5 * time.Second},
+		{Sensor: NewVirtualSensor(), Interval: 10 * time.Second},
 	}
 }
 

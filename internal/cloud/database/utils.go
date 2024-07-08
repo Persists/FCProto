@@ -2,7 +2,6 @@ package database
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net"
 	"time"
@@ -60,12 +59,13 @@ func UpsertClient(db *DB, remoteAddr string) *entities.ClientEntity {
 	return newClient
 }
 
-func GetRecentSensorMessages(db *DB) (sensorMessages [][]byte, insertErr error) {
+func GetRecentSensorMessages(db *DB, ipAddr string) (sensorMessages [][]byte, insertErr error) {
 	recentTime := time.Now().Add(-30 * time.Hour)
 
 	var contentArray []string
 	err := db.NewSelect().
 		Model((*entities.SensorMessageEntity)(nil)).
+		Where("client_ip_addr = ?", ipAddr).
 		Where("timestamp > ?", recentTime).
 		Order("timestamp DESC").
 		Column("content").
@@ -75,13 +75,10 @@ func GetRecentSensorMessages(db *DB) (sensorMessages [][]byte, insertErr error) 
 		return nil, err
 	}
 
-	fmt.Println("Recent string", contentArray)
-
 	for _, content := range contentArray {
 		sensorMessages = append(sensorMessages, []byte(content))
 	}
 
-	fmt.Printf("Recent sensor messages: %v\n", sensorMessages)
 	return sensorMessages, nil
 }
 

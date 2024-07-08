@@ -48,7 +48,8 @@ func Analyse(data []float64) (avg float64, dev float64, mean float64, min float6
 	return
 }
 
-func SortMessageData(data [][]byte) (virtualSensorData []SensorData, memorySensorData []MemSensorData) {
+// MapMessageData sorts the data into two slices, one for virtual sensor data and one for memory sensor data
+func MapMessageData(data [][]byte) (virtualSensorData []SensorData, memorySensorData []MemSensorData) {
 	for _, dataMsg := range data {
 		var contentMap map[string]interface{}
 		if err := json.Unmarshal(dataMsg, &contentMap); err != nil {
@@ -65,7 +66,7 @@ func SortMessageData(data [][]byte) (virtualSensorData []SensorData, memorySenso
 			virtualSensorData = append(virtualSensorData, sensorData)
 		}
 
-		if contentMap["Total"] != nil {
+		if contentMap["total"] != nil {
 			var memoryData MemSensorData
 			if err := json.Unmarshal(dataMsg, &memoryData); err != nil {
 				log.Printf("Failed to unmarshal data: %v", err)
@@ -75,9 +76,6 @@ func SortMessageData(data [][]byte) (virtualSensorData []SensorData, memorySenso
 		}
 
 	}
-
-	log.Print("virtualSensorData: ", virtualSensorData)
-	log.Print("memorySensorData: ", memorySensorData)
 
 	return
 }

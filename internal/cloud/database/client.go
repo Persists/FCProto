@@ -15,9 +15,8 @@ func NewClient() *DBClient {
 	return &DBClient{}
 }
 
-func (dbc *DBClient) Init(config *serverConfig.ServerConfig) error {
+func (dbc *DBClient) Init(config *serverConfig.ServerConfig) {
 	dbc.db = Connect(config.PostgresEnv)
-	return nil
 }
 
 func (dbc *DBClient) Start() error {
