@@ -7,34 +7,34 @@ import (
 	"github.com/Persists/fcproto/internal/shared/utils"
 )
 
-type SensorManager struct {
+type SensorClient struct {
 	sensors []struct {
 		Sensor   BaseSensor
 		Interval time.Duration
 	}
 }
 
-func NewSensorManager() *SensorManager {
-	return &SensorManager{}
+func NewClient() *SensorClient {
+	return &SensorClient{}
 }
 
-func (manager *SensorManager) Init() {
-	manager.sensors = []struct {
+func (sc *SensorClient) Init() {
+	sc.sensors = []struct {
 		Sensor   BaseSensor
 		Interval time.Duration
 	}{
-		{Sensor: NewCpuSensor(), Interval: 1 * time.Second},
-		{Sensor: NewMemSensor(), Interval: 2 * time.Second},
-		{Sensor: NewVirtualSensor(), Interval: 3 * time.Second},
+		{Sensor: NewCpuSensor(), Interval: 10 * time.Second},
+		{Sensor: NewMemSensor(), Interval: 20 * time.Second},
+		{Sensor: NewVirtualSensor(), Interval: 30 * time.Second},
 	}
 }
 
-func (manager *SensorManager) SendToReceiver(stopChan <-chan bool, send func(models.Message)) {
+func (sc *SensorClient) SendToReceiver(stopChan <-chan bool, send func(models.Message)) {
 
 	dataChan := make(chan string)
 
 	// Start generating data for each sensor
-	for _, sensor := range manager.sensors {
+	for _, sensor := range sc.sensors {
 		go utils.StartTicker(sensor.Interval, func() string {
 			return sensor.Sensor.GenerateData().ToString()
 		}, stopChan, dataChan)
@@ -48,7 +48,7 @@ func (manager *SensorManager) SendToReceiver(stopChan <-chan bool, send func(mod
 	}()
 }
 
-func (manager *SensorManager) Start(stopChan <-chan bool, send func(models.Message)) {
-	manager.Init()
-	manager.SendToReceiver(stopChan, send)
+func (sc *SensorClient) Start(stopChan <-chan bool, send func(models.Message)) {
+	sc.Init()
+	sc.SendToReceiver(stopChan, send)
 }

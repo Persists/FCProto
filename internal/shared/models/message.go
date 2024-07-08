@@ -8,6 +8,8 @@ const (
 	All       MessageTopic = "all"
 	Heartbeat MessageTopic = "heartbeat"
 	Sensor    MessageTopic = "sensor"
+	Fog       MessageTopic = "fog"
+	Cloud     MessageTopic = "cloud"
 )
 
 type Message struct {

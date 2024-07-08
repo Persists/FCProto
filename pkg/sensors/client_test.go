@@ -10,7 +10,7 @@ import (
 func TestGenerateDataAtInterval(t *testing.T) {
 
 	mockSensor := &MockSensor{}
-	mockManager := NewSensorManager()
+	mockClient := NewClient()
 
 	sensors := []struct {
 		Sensor   BaseSensor
@@ -20,7 +20,7 @@ func TestGenerateDataAtInterval(t *testing.T) {
 		{Sensor: mockSensor, Interval: 2 * time.Second},
 	}
 
-	mockManager.sensors = append(mockManager.sensors, sensors...)
+	mockClient.sensors = append(mockClient.sensors, sensors...)
 
 	sendMessages := []models.Message{}
 
@@ -30,7 +30,7 @@ func TestGenerateDataAtInterval(t *testing.T) {
 
 	stopChan := make(chan bool)
 
-	mockManager.SendToReceiver(stopChan, send)
+	mockClient.SendToReceiver(stopChan, send)
 
 	time.Sleep(4 * time.Second)
 

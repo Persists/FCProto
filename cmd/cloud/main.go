@@ -2,24 +2,21 @@ package main
 
 import (
 	"log"
+	"time"
+
+	"github.com/Persists/fcproto/internal/cloud"
+	"github.com/Persists/fcproto/internal/cloud/config"
 )
 
 func main() {
-	s := NewServer()
-	err := s.Init()
+	config, err := config.LoadConfig()
 	if err != nil {
-		log.Fatalf("failed to initialize server: %v", err)
+		log.Printf("failed to load env config: %v", err)
+
+		return
 	}
 
-	err = s.Start()
-	if err != nil {
-		log.Fatalf("failed to start server: %v", err)
-	}
+	cloud.NewClient().Init(config)
 
-	defer func(s *Server) {
-		err := s.Stop()
-		if err != nil {
-			log.Fatalf("failed to stop server: %v", err)
-		}
-	}(s)
+	time.Sleep(1000 * time.Second)
 }

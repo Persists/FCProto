@@ -3,17 +3,18 @@ package messages_utils
 import (
 	"context"
 	"encoding/json"
+	"log"
+	"time"
+
 	"github.com/Persists/fcproto/internal/cloud/database"
 	"github.com/Persists/fcproto/internal/cloud/database/models/entities"
 	"github.com/Persists/fcproto/internal/shared/models"
 	"github.com/mitchellh/mapstructure"
-	"log"
-	"time"
 )
 
 var ctx = context.Background()
 
-func InsertSensorMessage(db *database.DB, payload *map[string]interface{}, client *entities.ClientEntity) (err error) {
+func InsertSensorMessage(db *database.DB, payload *map[string]interface{}, remoteAddress string) (err error) {
 	var sensorData models.SensorMessage
 	err = mapstructure.Decode(payload, &sensorData)
 	if err != nil {
@@ -31,7 +32,7 @@ func InsertSensorMessage(db *database.DB, payload *map[string]interface{}, clien
 	_, err = db.NewInsert().
 		Model(&entities.SensorMessageEntity{
 			Content:      formattedContent,
-			ClientIpAddr: client.IpAddr,
+			ClientIpAddr: remoteAddress,
 			Timestamp:    formattedTimestamp,
 		}).Exec(ctx)
 	if err != nil {
