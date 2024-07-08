@@ -21,17 +21,22 @@ func (dbc *DBClient) Init(config *serverConfig.ServerConfig) error {
 }
 
 func (dbc *DBClient) Start() error {
+
 	_, err := dbc.db.ExecContext(ctx, `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`)
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
 
+	fmt.Println("Creating Schemas")
+
 	err = dbc.db.createSchema()
 	if err != nil {
 		fmt.Printf("Error to create Schemas")
 		return nil
 	}
+
+	fmt.Println("Database client started")
 
 	return nil
 }

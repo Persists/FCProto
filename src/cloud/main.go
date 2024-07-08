@@ -13,7 +13,7 @@ func onReceive(message *models.Message, cc *connection.ConnectionClient) {
 
 func main() {
 
-	_ = connection.Listen("localhost:8080", onReceive)
+	_ = connection.Listen(":8080", onReceive)
 
 	time := time.NewTimer(1000 * time.Second)
 

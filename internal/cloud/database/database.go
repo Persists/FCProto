@@ -4,13 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/Persists/fcproto/internal/cloud/database/models"
+	"log"
+	"time"
+
+	database_models "github.com/Persists/fcproto/internal/cloud/database/models"
 	"github.com/Persists/fcproto/internal/cloud/database/models/entities"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
-	"log"
-	"time"
 )
 
 type DB struct {
@@ -20,7 +21,6 @@ type DB struct {
 var ctx = context.Background()
 
 func Connect(env *database_models.PostgresEnv) *DB {
-	fmt.Println(env)
 	sqlDb := sql.OpenDB(pgdriver.NewConnector(
 		pgdriver.WithAddr(env.Addr),
 		pgdriver.WithDatabase(env.Database),
@@ -52,6 +52,7 @@ func (db *DB) createSchema() error {
 				fmt.Println(err)
 				return err
 			}
+			fmt.Println("schema created")
 			fmt.Println(c)
 		}
 		return nil
