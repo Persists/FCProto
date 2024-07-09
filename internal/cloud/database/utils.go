@@ -60,7 +60,7 @@ func UpsertClient(db *DB, remoteAddr string) *entities.ClientEntity {
 }
 
 func GetRecentSensorMessages(db *DB, ipAddr string) (sensorMessages [][]byte, insertErr error) {
-	recentTime := time.Now().Add(-30 * time.Hour)
+	recentTime := time.Now().Add(-1 * time.Minute)
 
 	var contentArray []string
 	err := db.NewSelect().

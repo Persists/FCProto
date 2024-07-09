@@ -62,7 +62,7 @@ func (cc *CloudClient) Init(config *config.ServerConfig) error {
 func (cc *CloudClient) StartInformer() {
 	go func() {
 		for {
-			time.Sleep(30 * time.Second)
+			time.Sleep(10 * time.Second)
 			cc.InformFog()
 		}
 	}()
