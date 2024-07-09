@@ -2,6 +2,8 @@ package database
 
 import (
 	"fmt"
+	"github.com/Persists/fcproto/internal/shared/utils"
+	"log"
 
 	serverConfig "github.com/Persists/fcproto/internal/cloud/config"
 )
@@ -27,15 +29,13 @@ func (dbc *DBClient) Start() error {
 		return nil
 	}
 
-	fmt.Println("Creating Schemas")
-
 	err = dbc.db.createSchema()
 	if err != nil {
 		fmt.Printf("Error to create Schemas")
 		return nil
 	}
 
-	fmt.Println("Database client started")
+	log.Println(utils.Colorize(utils.Green, "Database client started"))
 
 	return nil
 }

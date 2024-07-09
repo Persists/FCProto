@@ -21,22 +21,31 @@ type DB struct {
 var ctx = context.Background()
 
 func Connect(env *database_models.PostgresEnv) *DB {
-	sqlDb := sql.OpenDB(pgdriver.NewConnector(
-		pgdriver.WithAddr(env.Addr),
-		pgdriver.WithDatabase(env.Database),
-		pgdriver.WithUser(env.User),
-		pgdriver.WithPassword(env.Password),
-		pgdriver.WithInsecure(true),
-	))
+	retryDelay := 1 * time.Second
+	maxRetryDelay := 16 * retryDelay
 
-	db := bun.NewDB(sqlDb, pgdialect.New())
+	for {
+		sqlDb := sql.OpenDB(pgdriver.NewConnector(
+			pgdriver.WithAddr(env.Addr),
+			pgdriver.WithDatabase(env.Database),
+			pgdriver.WithUser(env.User),
+			pgdriver.WithPassword(env.Password),
+			pgdriver.WithInsecure(true),
+		))
+		db := bun.NewDB(sqlDb, pgdialect.New())
 
-	if err := db.Ping(); err != nil {
-		log.Print("Failed to connect to database")
-		log.Fatal(err)
+		if err := db.Ping(); err != nil {
+			log.Printf("Failed to connect to Database: %v. Retrying in %s...", err, retryDelay)
+			time.Sleep(retryDelay)
+			retryDelay *= 2
+			if retryDelay > maxRetryDelay {
+				retryDelay = maxRetryDelay
+			}
+			continue
+		}
+
+		return &DB{db}
 	}
-
-	return &DB{db}
 }
 
 func (db *DB) createSchema() error {
@@ -65,7 +74,7 @@ func (db *DB) InsertClient(ipAddr string) (*entities.ClientEntity, error) {
 	_, err := db.NewInsert().
 		Model(client).
 		On("CONFLICT (ip_addr) DO UPDATE").
-		Set("last_seen = EXCLUDED.last_seen, notify_addr = EXCLUDED.notify_addr").
+		Set("last_seen = EXCLUDED.last_seen").
 		Exec(ctx)
 	if err != nil {
 		log.Printf("Failed to insert client into database: %v", err)

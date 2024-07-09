@@ -1,6 +1,8 @@
 package connection
 
 import (
+	"fmt"
+	"github.com/Persists/fcproto/internal/shared/utils"
 	"log"
 	"net"
 	"time"
@@ -14,10 +16,13 @@ func Connect(socketAddress string) *ConnectionClient {
 
 	go func() {
 	connect:
-		err := cc.connectWithExpotentialBackoff(socketAddress)
-		if err != nil {
-			log.Printf("Failed to reconnect: %v", err)
-		}
+
+		stopPrint := make(chan struct{})
+		utils.LogQueuePeriodically(cc.sendQueue, stopPrint)
+
+		cc.connectWithExpotentialBackoff(socketAddress)
+
+		close(stopPrint)
 
 		cc.stop = make(chan struct{})
 		go cc.sendRoutine()
@@ -32,14 +37,15 @@ func Connect(socketAddress string) *ConnectionClient {
 }
 
 // connectWithExpotentialBackoff will connect to the given socket address and implements a backoff mechanism
-func (cc *ConnectionClient) connectWithExpotentialBackoff(socketAddress string) error {
-	retryDelay := 2 * time.Second
-	maxRetryDelay := 60 * time.Second // Maximum retry delay
+func (cc *ConnectionClient) connectWithExpotentialBackoff(socketAddress string) {
+	retryDelay := 1 * time.Second
+	maxRetryDelay := 60 * time.Second
 
 	for {
 		conn, err := net.Dial("tcp", socketAddress)
 		if err != nil {
-			log.Printf("Failed to connect to %s: %v. Retrying in %s...", socketAddress, err, retryDelay)
+			msg := fmt.Sprintf("Failed to connect to %s: %v. Retrying in %s...", socketAddress, err, retryDelay)
+			log.Println(utils.Colorize(utils.Red, msg))
 			time.Sleep(retryDelay)
 			retryDelay *= 2
 			if retryDelay > maxRetryDelay {
@@ -47,9 +53,10 @@ func (cc *ConnectionClient) connectWithExpotentialBackoff(socketAddress string) 
 			}
 			continue
 		} else {
-			log.Printf("Connected to %s", socketAddress)
+			msg := fmt.Sprintf("Connected to %s", socketAddress)
+			log.Println(utils.Colorize(utils.Green, msg))
 			cc.conn = &conn
-			return nil
+			return
 		}
 
 	}

@@ -2,15 +2,16 @@ package fog
 
 import (
 	"fmt"
+	"github.com/Persists/fcproto/internal/fog/config"
+	"github.com/Persists/fcproto/internal/shared/utils"
 	"log"
 
-	client_config "github.com/Persists/fcproto/internal/client/client-config"
 	"github.com/Persists/fcproto/internal/shared/connection"
 	"github.com/Persists/fcproto/pkg/sensors"
 )
 
 type FogClient struct {
-	serverConfig *client_config.ClientConfig
+	serverConfig *config.ClientConfig
 	cc           *connection.ConnectionClient
 	sc           *sensors.SensorClient
 
@@ -19,28 +20,28 @@ type FogClient struct {
 
 func NewClient() *FogClient {
 	return &FogClient{
-		serverConfig: &client_config.ClientConfig{},
+		serverConfig: &config.ClientConfig{},
 		sc:           sensors.NewClient(),
 	}
 }
 
 func (fc *FogClient) Init() error {
-	config, err := client_config.LoadConfig()
+	config, err := config.LoadConfig()
 
 	if err != nil {
 		log.Printf("failed to load config: %v", err)
 		return err
 	}
-
 	client := connection.Connect(config.SocketAddr)
 	fc.cc = client
 
 	fc.sc.Start(fc.stopChan, fc.cc.Send)
 
+	fmt.Println("Fog client initialized")
 	for {
 		serverMessage := fc.cc.Receive()
-
-		fmt.Printf("Received message from server: Topic: %s, Payload: %s\n", serverMessage.Topic, serverMessage.Payload)
+		formattedServerMessage := utils.FormatCloudAnalysisData(serverMessage)
+		log.Println(utils.Colorize(utils.Yellow, formattedServerMessage))
 	}
 
 	return nil

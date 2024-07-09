@@ -1,7 +1,6 @@
-package client_config
+package config
 
 import (
-	"fmt"
 	"github.com/Persists/fcproto/internal/shared/models"
 	"github.com/Persists/fcproto/internal/shared/utils"
 	"github.com/joho/godotenv"
@@ -33,7 +32,6 @@ func LoadConfig() (*ClientConfig, error) {
 		NotifyPort: utils.GetEnv("NOTIFY_PORT", "5556"),
 		SendPort:   port,
 	}
-	fmt.Printf("config: %v\n", config.BaseEnv)
 
 	return config, nil
 }

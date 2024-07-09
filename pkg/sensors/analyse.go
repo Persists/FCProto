@@ -53,6 +53,7 @@ func MapMessageData(data [][]byte) (virtualSensorData []SensorData, memorySensor
 	for _, dataMsg := range data {
 		var contentMap map[string]interface{}
 		if err := json.Unmarshal(dataMsg, &contentMap); err != nil {
+
 			log.Printf("Failed to unmarshal data: %v", err)
 			continue
 		}
