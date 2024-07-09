@@ -48,7 +48,7 @@ func Listen(socketAddr string, onReceive func(msg *models.Message, cc *Connectio
 			// if connection already exists, do not create new queues
 			// we just need to restart the goroutines
 			if _, ok := listenerClient.Connections[ip]; ok {
-				logMsg := fmt.Sprintf("Connection already exists for %s", conn.RemoteAddr().String())
+				logMsg := fmt.Sprintf("Client already exists: %s", conn.RemoteAddr().String())
 				log.Println(utils.Colorize(utils.Blue, logMsg))
 
 				if listenerClient.Connections[ip].stopped() {
@@ -59,17 +59,31 @@ func Listen(socketAddr string, onReceive func(msg *models.Message, cc *Connectio
 					go listenerClient.Connections[ip].receiveRoutine()
 				}
 
+				logMsg = fmt.Sprintf("Queues reattached to: %s", conn.RemoteAddr().String())
+				log.Println(utils.Colorize(utils.Blue, logMsg))
+
 				continue
 			} else {
+				logMsg := fmt.Sprintf("New client connected %s", conn.RemoteAddr().String())
+				log.Println(utils.Colorize(utils.Blue, logMsg))
 				listenerClient.Connections[ip] = newListenerConnection(&conn)
 
 				listenerClient.Connections[ip].stop = make(chan struct{})
 				go listenerClient.Connections[ip].sendRoutine()
 				go listenerClient.Connections[ip].receiveRoutine()
 
+				logMsg = fmt.Sprintf("Queue setup completed for: %s", conn.RemoteAddr().String())
+				log.Println(utils.Colorize(utils.Blue, logMsg))
+
 				go func() {
+					totalMessagesFromClient := 0
 					for {
 						msg := listenerClient.Connections[ip].Receive()
+						totalMessagesFromClient += 1
+						if totalMessagesFromClient%10 == 0 {
+							totalMsg := fmt.Sprintf("Total messages from %s: %d", ip, totalMessagesFromClient)
+							log.Println(utils.Colorize(utils.Purple, totalMsg))
+						}
 						onReceive(&msg, listenerClient.Connections[ip])
 					}
 				}()

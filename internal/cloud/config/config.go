@@ -5,7 +5,6 @@ import (
 	"github.com/Persists/fcproto/internal/shared/models"
 	"github.com/Persists/fcproto/internal/shared/utils"
 	"github.com/joho/godotenv"
-	"log"
 )
 
 type ServerConfig struct {
@@ -14,11 +13,7 @@ type ServerConfig struct {
 }
 
 func LoadConfig() (*ServerConfig, error) {
-	err := godotenv.Load(".cloud.env")
-
-	if err != nil {
-		log.Printf("No .cloud.env file found, using fallback variables: %v\n", err)
-	}
+	godotenv.Load(".cloud.env")
 
 	baseEnv := &models.BaseEnv{
 		SocketAddr: utils.GetEnv("SOCKET_ADDR", ":5555"),

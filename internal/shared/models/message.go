@@ -11,7 +11,7 @@ const (
 	All       MessageTopic = "all"
 	Heartbeat MessageTopic = "heartbeat"
 	Sensor    MessageTopic = "sensor"
-	Fog       MessageTopic = "fog"
+	Fog       MessageTopic = "edge"
 	Cloud     MessageTopic = "cloud"
 	Analysis  MessageTopic = "Analysis"
 )

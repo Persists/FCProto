@@ -3,7 +3,6 @@ package connection
 import (
 	"bufio"
 	"encoding/json"
-	"github.com/Persists/fcproto/internal/shared/utils"
 	"io"
 	"log"
 
@@ -26,7 +25,7 @@ func (cc *ConnectionClient) receiveRoutine() {
 		// and emit a signal to other routines to stop
 		if err != nil {
 			if err == io.EOF {
-				log.Println(utils.Colorize(utils.Red, "Connection closed"))
+				log.Printf("Connection closed to %s", (*cc.conn).RemoteAddr())
 
 				close(cc.stop)
 				return

@@ -23,20 +23,20 @@
   vars:
     ansible_python_interpreter: /opt/ansible_venv/bin/python
   tasks:
-    - name: Check if fog-cloud namespace exists
-      command: microk8s kubectl get namespace fog-cloud
+    - name: Check if edge-cloud namespace exists
+      command: microk8s kubectl get namespace edge-cloud
       register: fog_cloud_namespace
       ignore_errors: yes
 
-    - name: Create fog-cloud namespace if it does not exist
-      shell: microk8s kubectl create namespace fog-cloud
+    - name: Create edge-cloud namespace if it does not exist
+      shell: microk8s kubectl create namespace edge-cloud
       when: fog_cloud_namespace.rc != 0
 
     - name: Label the edge node
       command: microk8s kubectl label node ubuntu role=edge --overwrite
 
-    - name: Label the fog nodes
-      command: microk8s kubectl label node intermediate-node-1 intermediate-node-2 role=fog --overwrite
+    - name: Label the edge nodes
+      command: microk8s kubectl label node intermediate-node-1 intermediate-node-2 role=edge --overwrite
 
     - name: Label the cloud node
       command: microk8s kubectl label node cloud-node role=cloud --overwrite

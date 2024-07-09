@@ -1,4 +1,4 @@
-name: fog-cloud
+name: edge-cloud
 
 services:
   dbeaver:
@@ -21,18 +21,16 @@ services:
     ports:
       - "5432:5432"
 
-  fog:
-    container_name: fog
-    image: codinggandalf/fog-computing:fog
+  edge:
+    container_name: edge
+    image: codinggandalf/fog-computing:edge
     restart: always
-    # depends_on:
-    #   - cloud
     build:
       context: ./../..
       target: prod
-      dockerfile: deployment/docker/Fog.Dockerfile
+      dockerfile: ./deployment/docker/Edge.Dockerfile
     env_file:
-      - ../../.fog.env
+      - ../../.edge.env
     networks:
       - fog
       - cloud
