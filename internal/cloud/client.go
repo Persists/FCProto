@@ -1,6 +1,8 @@
 package cloud
 
 import (
+	"fmt"
+	"github.com/Persists/fcproto/internal/shared/utils"
 	"log"
 	"time"
 
@@ -36,7 +38,8 @@ func (cc *CloudClient) onReceive(message *models.Message, connectionClient *conn
 func (cc *CloudClient) Start() error {
 	err := cc.dbc.Start()
 	if err != nil {
-		log.Printf("Failed to start database client: %v", err)
+		message := fmt.Sprintf("Failed to start database client: %v", err)
+		log.Println(utils.Colorize(utils.Yellow, message))
 	}
 
 	cc.lc = connection.Listen(cc.socketAddress, cc.onReceive)

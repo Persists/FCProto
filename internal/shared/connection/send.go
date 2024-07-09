@@ -1,7 +1,7 @@
 package connection
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/Persists/fcproto/internal/shared/models"
 	"github.com/Persists/fcproto/internal/shared/utils"
@@ -21,7 +21,7 @@ func (cc *ConnectionClient) sendRoutine() {
 		err := utils.SendMessage(*cc.conn, message)
 
 		if err != nil {
-			fmt.Println("Failed to send message")
+			log.Println(utils.Colorize(utils.Red, "Failed to send message"))
 		}
 	}
 }

@@ -3,6 +3,7 @@ package connection
 import (
 	"bufio"
 	"encoding/json"
+	"github.com/Persists/fcproto/internal/shared/utils"
 	"io"
 	"log"
 
@@ -25,7 +26,7 @@ func (cc *ConnectionClient) receiveRoutine() {
 		// and emit a signal to other routines to stop
 		if err != nil {
 			if err == io.EOF {
-				log.Printf("Connection closed")
+				log.Println(utils.Colorize(utils.Red, "Connection closed"))
 
 				close(cc.stop)
 				return

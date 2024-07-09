@@ -1,6 +1,9 @@
 package models
 
-import "github.com/fatih/structs"
+import (
+	"github.com/fatih/structs"
+	"time"
+)
 
 type MessageTopic string
 
@@ -16,6 +19,7 @@ const (
 type Message struct {
 	Topic   MessageTopic            `json:"topic"`
 	Payload *map[string]interface{} `json:"payload"`
+	Time    time.Time               `json:"time"`
 }
 
 func NewMessage(topic MessageTopic, payload any) Message {
@@ -24,5 +28,6 @@ func NewMessage(topic MessageTopic, payload any) Message {
 	return Message{
 		Topic:   topic,
 		Payload: &formatedPayload,
+		Time:    time.Now(),
 	}
 }

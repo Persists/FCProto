@@ -1,6 +1,8 @@
 package connection
 
 import (
+	"fmt"
+	"github.com/Persists/fcproto/internal/shared/utils"
 	"log"
 	"net"
 
@@ -46,7 +48,8 @@ func Listen(socketAddr string, onReceive func(msg *models.Message, cc *Connectio
 			// if connection already exists, do not create new queues
 			// we just need to restart the goroutines
 			if _, ok := listenerClient.Connections[ip]; ok {
-				log.Printf("Connection already exists for %s", conn.RemoteAddr().String())
+				logMsg := fmt.Sprintf("Connection already exists for %s", conn.RemoteAddr().String())
+				log.Println(utils.Colorize(utils.Blue, logMsg))
 
 				if listenerClient.Connections[ip].stopped() {
 					listenerClient.Connections[ip].conn = &conn
@@ -67,8 +70,6 @@ func Listen(socketAddr string, onReceive func(msg *models.Message, cc *Connectio
 				go func() {
 					for {
 						msg := listenerClient.Connections[ip].Receive()
-						// Debug print
-						println("Queue Len:", listenerClient.Connections[ip].receiveQueue.Len())
 						onReceive(&msg, listenerClient.Connections[ip])
 					}
 				}()
