@@ -26,11 +26,11 @@
   hosts: controller-node
   become: yes
   tasks:
-    - name: Create fog-cloud namespace
+    - name: Create edge-cloud namespace
       k8s:
         api_version: v1
         kind: Namespace
-        name: fog-cloud
+        name: edge-cloud
         state: present
 
     - name: Label the edge node
@@ -43,13 +43,13 @@
         state: present
       when: inventory_hostname == 'edge-node-pi'
 
-    - name: Label the fog nodes
+    - name: Label the edge nodes
       k8s:
         api_version: v1
         kind: Node
         name: "{{ inventory_hostname }}"
         labels:
-          role: fog
+          role: edge
         state: present
       when: inventory_hostname in ['intermediate-node-1', 'intermediate-node-2']
 
