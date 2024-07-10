@@ -7,10 +7,10 @@ type SensorMessage struct {
 	Timestamp int64 `json:"timestamp"`
 
 	// message content
-	// TODO: expand the content to include more fields
 	Content string `json:"content"`
 }
 
+// creates a new sensor message with the given content
 func NewSensorMessage(content string) SensorMessage {
 	return SensorMessage{
 		Timestamp: time.Now().Unix(),

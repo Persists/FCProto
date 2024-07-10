@@ -17,10 +17,12 @@ func NewClient() *DBClient {
 	return &DBClient{}
 }
 
+// Init initializes the database client
 func (dbc *DBClient) Init(config *serverConfig.ServerConfig) {
 	dbc.db = Connect(config.PostgresEnv)
 }
 
+// Start initializes the database client
 func (dbc *DBClient) Start() error {
 
 	_, err := dbc.db.ExecContext(ctx, `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`)

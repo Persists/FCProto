@@ -7,11 +7,13 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// ServerConfig represents the server configuration
 type ServerConfig struct {
 	*models.BaseEnv
 	*database_models.PostgresEnv
 }
 
+// LoadConfig loads the server configuration from the environment
 func LoadConfig() (*ServerConfig, error) {
 	godotenv.Load(".cloud.env")
 

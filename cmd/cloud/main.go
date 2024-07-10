@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"time"
 
 	"github.com/Persists/fcproto/internal/cloud"
 	"github.com/Persists/fcproto/internal/cloud/config"
@@ -15,10 +14,15 @@ func main() {
 		return
 	}
 
+	// create a new cloud client
 	cc := cloud.NewClient()
+
+	// initialize the cloud client
 	cc.Init(config)
 
-	cc.Start()
-
-	time.Sleep(1000 * time.Second)
+	// start the cloud client
+	err = cc.Start()
+	if err != nil {
+		log.Fatalf("failed to start the cloud client: %v", err)
+	}
 }

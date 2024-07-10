@@ -1,17 +1,19 @@
 package main
 
 import (
-	edge "github.com/Persists/fcproto/internal/edge"
 	"log"
-	"time"
+
+	edge "github.com/Persists/fcproto/internal/edge"
 )
 
 func main() {
+	// create a new edge client
 	fc := edge.NewClient()
-	err := fc.Init()
+
+	// initialize the edge client
+	err := fc.Start()
 	if err != nil {
 		log.Fatalf("failed to initialize the edge client: %v", err)
 	}
 
-	time.Sleep(1000 * time.Second)
 }
