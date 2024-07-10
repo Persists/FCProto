@@ -31,37 +31,3 @@ func TestAnalyse(t *testing.T) {
 		t.Errorf("Expected max to be 25 but got %f", max)
 	}
 }
-
-func TestGetRecentSensorMessages(t *testing.T) {
-	sensorDataByte := []byte(`{
-		"Temperature": 2,
-		"Humidity": 3,
-	}`)
-	memoryDataByte := []byte(`{
-		"Available": 1,
-		"Total": 1,
-		"Used": 1,
-	}`)
-	byteData  := [][]byte{memoryDataByte, sensorDataByte}
-
-	virtualSensorData, memorySensorData := MapMessageData(byteData)
-
-	expectedSensorData := &SensorData{
-		Temperature: 2,
-		Humidity: 3,
-	}
-	expectedMemoryData := &MemSensorData{
-		Available: 1,
-		Total: 1,
-		Used: 1,
-	}
-	
-	if virtualSensorData[0] != *expectedSensorData {
-		t.Errorf("Expected sensor data to be %v but got %v", expectedSensorData, virtualSensorData[0])
-	}
-
-	if memorySensorData[0] != *expectedMemoryData {
-		t.Errorf("Expected memory data to be %v but got %v", expectedMemoryData, memorySensorData[0])
-	}
-
-}

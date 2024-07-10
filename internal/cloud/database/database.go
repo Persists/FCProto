@@ -20,6 +20,8 @@ type DB struct {
 
 var ctx = context.Background()
 
+// Connect creates a new database connection
+// using exponential backoff when failing to connect
 func Connect(env *database_models.PostgresEnv) *DB {
 	retryDelay := 1 * time.Second
 	maxRetryDelay := 16 * retryDelay
@@ -48,6 +50,7 @@ func Connect(env *database_models.PostgresEnv) *DB {
 	}
 }
 
+// createSchema creates the database schema
 func (db *DB) createSchema() error {
 	models := []interface{}{
 		(*entities.ClientEntity)(nil),
@@ -64,4 +67,22 @@ func (db *DB) createSchema() error {
 		}
 		return nil
 	})
+}
+
+// InsertClient inserts a new client into the database
+func (db *DB) InsertClient(ipAddr string) (*entities.ClientEntity, error) {
+	client := &entities.ClientEntity{
+		IpAddr:   ipAddr,
+		LastSeen: time.Now(),
+	}
+	_, err := db.NewInsert().
+		Model(client).
+		On("CONFLICT (ip_addr) DO UPDATE").
+		Set("last_seen = EXCLUDED.last_seen").
+		Exec(ctx)
+	if err != nil {
+		log.Printf("Failed to insert client into database: %v", err)
+		return nil, err
+	}
+	return client, nil
 }

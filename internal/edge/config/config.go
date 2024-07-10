@@ -1,11 +1,12 @@
 package config
 
 import (
+	"log"
+	"strconv"
+
 	"github.com/Persists/fcproto/internal/shared/models"
 	"github.com/Persists/fcproto/internal/shared/utils"
 	"github.com/joho/godotenv"
-	"log"
-	"strconv"
 )
 
 type ClientConfig struct {
@@ -15,6 +16,7 @@ type ClientConfig struct {
 	*models.BaseEnv
 }
 
+// LoadConfig loads the client configuration from the environment for the edge
 func LoadConfig() (*ClientConfig, error) {
 	err := godotenv.Load("..edge.env")
 

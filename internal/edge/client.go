@@ -2,15 +2,16 @@ package edge
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/Persists/fcproto/internal/edge/config"
 	"github.com/Persists/fcproto/internal/shared/utils"
-	"log"
 
 	"github.com/Persists/fcproto/internal/shared/connection"
 	"github.com/Persists/fcproto/pkg/sensors"
 )
 
-type FogClient struct {
+type EdgeClient struct {
 	serverConfig *config.ClientConfig
 	cc           *connection.ConnectionClient
 	sc           *sensors.SensorClient
@@ -18,14 +19,15 @@ type FogClient struct {
 	stopChan chan bool
 }
 
-func NewClient() *FogClient {
-	return &FogClient{
+func NewClient() *EdgeClient {
+	return &EdgeClient{
 		serverConfig: &config.ClientConfig{},
 		sc:           sensors.NewClient(),
 	}
 }
 
-func (fc *FogClient) Init() error {
+// Start initializes the fog client
+func (ec *EdgeClient) Start() error {
 	config, err := config.LoadConfig()
 
 	if err != nil {
@@ -33,16 +35,14 @@ func (fc *FogClient) Init() error {
 		return err
 	}
 	client := connection.Connect(config.SocketAddr)
-	fc.cc = client
+	ec.cc = client
 
-	fc.sc.Start(fc.stopChan, fc.cc.Send)
+	ec.sc.Start(ec.stopChan, ec.cc.Send)
 
 	fmt.Println("Fog client initialized")
 	for {
-		serverMessage := fc.cc.Receive()
+		serverMessage := ec.cc.Receive()
 		formattedServerMessage := utils.FormatCloudAnalysisData(serverMessage)
 		log.Println(utils.Colorize(utils.Yellow, formattedServerMessage))
 	}
-
-	return nil
 }

@@ -2,9 +2,10 @@ package cloud
 
 import (
 	"fmt"
-	"github.com/Persists/fcproto/internal/shared/utils"
 	"log"
 	"time"
+
+	"github.com/Persists/fcproto/internal/shared/utils"
 
 	"github.com/Persists/fcproto/internal/cloud/config"
 	"github.com/Persists/fcproto/internal/cloud/database"
@@ -24,6 +25,7 @@ func NewClient() *CloudClient {
 	return &CloudClient{}
 }
 
+// onReceive is a callback function that is called when a message is received
 func (cc *CloudClient) onReceive(message *models.Message, connectionClient *connection.ConnectionClient) {
 	db := cc.dbc.GetDB()
 
@@ -35,6 +37,7 @@ func (cc *CloudClient) onReceive(message *models.Message, connectionClient *conn
 	}
 }
 
+// Start initializes the database client and starts the listener
 func (cc *CloudClient) Start() error {
 	err := cc.dbc.Start()
 	if err != nil {
@@ -44,12 +47,14 @@ func (cc *CloudClient) Start() error {
 
 	cc.lc = connection.Listen(cc.socketAddress, cc.onReceive)
 
-	cc.StartInformer()
-
-	return nil
+	for {
+		time.Sleep(10 * time.Second)
+		cc.InformFog()
+	}
 
 }
 
+// Init initializes the cloud client
 func (cc *CloudClient) Init(config *config.ServerConfig) error {
 	cc.dbc = database.NewClient()
 	cc.socketAddress = config.SocketAddr
@@ -59,16 +64,7 @@ func (cc *CloudClient) Init(config *config.ServerConfig) error {
 	return nil
 }
 
-func (cc *CloudClient) StartInformer() {
-	go func() {
-		for {
-			time.Sleep(10 * time.Second)
-			cc.InformFog()
-		}
-	}()
-
-}
-
+// Informs the fog about the analysis of the sensor data
 func (cc *CloudClient) InformFog() {
 	db := cc.dbc.GetDB()
 	for ip, conn := range cc.lc.Connections {

@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// SensorMessageEntity is the entity for the sensor message
 type SensorMessageEntity struct {
 	ID uuid.UUID `bun:"type:uuid,default:uuid_generate_v4()"`
 

@@ -11,6 +11,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+// InsertSensorMessage inserts a sensor message into the database
 func InsertSensorMessage(db *DB, payload *map[string]interface{}, remoteAddress string) (err error) {
 	var sensorData models.SensorMessage
 	err = mapstructure.Decode(payload, &sensorData)
@@ -41,6 +42,7 @@ func InsertSensorMessage(db *DB, payload *map[string]interface{}, remoteAddress 
 	return nil
 }
 
+// UpsertClient inserts a new client into the database if it doesn't exist, otherwise updates the last seen time
 func UpsertClient(db *DB, remoteAddr string) *entities.ClientEntity {
 	newClient := new(entities.ClientEntity)
 	ip, _, err := net.SplitHostPort(remoteAddr)
@@ -59,6 +61,7 @@ func UpsertClient(db *DB, remoteAddr string) *entities.ClientEntity {
 	return newClient
 }
 
+// GetRecentSensorMessages returns the most recent sensor messages (1 minute) of a client
 func GetRecentSensorMessages(db *DB, ipAddr string) (sensorMessages [][]byte, insertErr error) {
 	recentTime := time.Now().Add(-1 * time.Minute)
 
@@ -82,6 +85,7 @@ func GetRecentSensorMessages(db *DB, ipAddr string) (sensorMessages [][]byte, in
 	return sensorMessages, nil
 }
 
+// formatContent formats the content of the sensor message
 func formatContent(content string) (string, error) {
 	var prettyContent interface{}
 	err := json.Unmarshal([]byte(content), &prettyContent)

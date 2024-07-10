@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/fatih/structs"
 	"time"
+
+	"github.com/fatih/structs"
 )
 
 type MessageTopic string
@@ -22,6 +23,7 @@ type Message struct {
 	Time    time.Time               `json:"time"`
 }
 
+// creates a new message with the given topic and payload
 func NewMessage(topic MessageTopic, payload any) Message {
 	formatedPayload := structs.Map(payload)
 

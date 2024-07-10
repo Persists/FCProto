@@ -2,9 +2,10 @@ package connection
 
 import (
 	"fmt"
-	"github.com/Persists/fcproto/internal/shared/utils"
 	"log"
 	"net"
+
+	"github.com/Persists/fcproto/internal/shared/utils"
 
 	"github.com/Persists/fcproto/internal/shared/models"
 	"github.com/Persists/fcproto/internal/shared/queue"
@@ -54,6 +55,7 @@ func Listen(socketAddr string, onReceive func(msg *models.Message, cc *Connectio
 				if listenerClient.Connections[ip].stopped() {
 					listenerClient.Connections[ip].conn = &conn
 
+					// start the send and receive routines and the stop channel
 					listenerClient.Connections[ip].stop = make(chan struct{})
 					go listenerClient.Connections[ip].sendRoutine()
 					go listenerClient.Connections[ip].receiveRoutine()
@@ -68,6 +70,7 @@ func Listen(socketAddr string, onReceive func(msg *models.Message, cc *Connectio
 				log.Println(utils.Colorize(utils.Blue, logMsg))
 				listenerClient.Connections[ip] = newListenerConnection(&conn)
 
+				// start the send and receive routines and the stop channel
 				listenerClient.Connections[ip].stop = make(chan struct{})
 				go listenerClient.Connections[ip].sendRoutine()
 				go listenerClient.Connections[ip].receiveRoutine()
@@ -75,6 +78,8 @@ func Listen(socketAddr string, onReceive func(msg *models.Message, cc *Connectio
 				logMsg = fmt.Sprintf("Queue setup completed for: %s", conn.RemoteAddr().String())
 				log.Println(utils.Colorize(utils.Blue, logMsg))
 
+				// start a goroutine to receive messages from the client
+				// (only needs to be done once per client connection and only on initial connection)
 				go func() {
 					totalMessagesFromClient := 0
 					for {
@@ -96,10 +101,11 @@ func Listen(socketAddr string, onReceive func(msg *models.Message, cc *Connectio
 	return listenerClient
 }
 
+// newListenerConnection creates a new connection client for the listener
 func newListenerConnection(conn *net.Conn) *ConnectionClient {
 	return &ConnectionClient{
 		ingress: queue.New[models.Message](),
-		egress:    queue.New[models.Message](),
+		egress:  queue.New[models.Message](),
 
 		conn: conn,
 	}
