@@ -65,38 +65,3 @@ func (db *DB) createSchema() error {
 		return nil
 	})
 }
-
-func (db *DB) InsertClient(ipAddr string) (*entities.ClientEntity, error) {
-	client := &entities.ClientEntity{
-		IpAddr:   ipAddr,
-		LastSeen: time.Now(),
-	}
-	_, err := db.NewInsert().
-		Model(client).
-		On("CONFLICT (ip_addr) DO UPDATE").
-		Set("last_seen = EXCLUDED.last_seen").
-		Exec(ctx)
-	if err != nil {
-		log.Printf("Failed to insert client into database: %v", err)
-		return nil, err
-	}
-	return client, nil
-}
-
-func (db *DB) GetRecentSensorMessages() ([]entities.SensorMessageEntity, error) {
-	var messages []entities.SensorMessageEntity
-	tenMinutesAgo := time.Now().Add(-2 * time.Minute)
-
-	err := db.NewSelect().
-		Model(&messages).
-		Where("timestamp > ?", tenMinutesAgo).
-		Relation("Client").
-		Order("timestamp DESC").
-		Scan(ctx)
-	if err != nil {
-		log.Printf("Failed to get recent sensor messages: %v", err)
-		return nil, err
-	}
-
-	return messages, nil
-}
