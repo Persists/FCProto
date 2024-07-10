@@ -18,7 +18,7 @@ func Connect(socketAddress string) *ConnectionClient {
 	connect:
 
 		stopPrint := make(chan struct{})
-		utils.LogQueuePeriodically(cc.sendQueue, stopPrint)
+		utils.LogQueuePeriodically(cc.egress, stopPrint)
 
 		cc.connectWithExpotentialBackoff(socketAddress)
 

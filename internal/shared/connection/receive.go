@@ -34,12 +34,12 @@ func (cc *ConnectionClient) receiveRoutine() {
 			continue
 		}
 
-		cc.receiveQueue.Enqueue(message)
+		cc.ingress.Enqueue(message)
 	}
 }
 
 // Receive returns the next message in the receive queue
 // if no messages are in the queue it blocks until a message is received
 func (cc *ConnectionClient) Receive() models.Message {
-	return cc.receiveQueue.Dequeue()
+	return cc.ingress.Dequeue()
 }

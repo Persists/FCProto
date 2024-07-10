@@ -11,10 +11,10 @@ import (
 // and send them to the connection subsequently
 func (cc *ConnectionClient) sendRoutine() {
 	for {
-		message := cc.sendQueue.Dequeue()
+		message := cc.egress.Dequeue()
 
 		if stop := cc.stopped(); stop {
-			cc.sendQueue.Enqueue(message)
+			cc.egress.Enqueue(message)
 			return
 		}
 
@@ -28,5 +28,5 @@ func (cc *ConnectionClient) sendRoutine() {
 
 // Send enqueues a message to the send queue
 func (cc *ConnectionClient) Send(message models.Message) {
-	cc.sendQueue.Enqueue(message)
+	cc.egress.Enqueue(message)
 }

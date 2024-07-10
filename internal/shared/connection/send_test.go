@@ -13,8 +13,8 @@ func TestConnectionClient_Send(t *testing.T) {
 	server, client := net.Pipe()
 
 	ccClient := &ConnectionClient{
-		receiveQueue: &queue.Queue[models.Message]{},
-		sendQueue:    &queue.Queue[models.Message]{},
+		ingress: &queue.Queue[models.Message]{},
+		egress:    &queue.Queue[models.Message]{},
 
 		stop: make(chan struct{}),
 
@@ -22,8 +22,8 @@ func TestConnectionClient_Send(t *testing.T) {
 	}
 
 	ccServer := &ConnectionClient{
-		receiveQueue: &queue.Queue[models.Message]{},
-		sendQueue:    &queue.Queue[models.Message]{},
+		ingress: &queue.Queue[models.Message]{},
+		egress:  &queue.Queue[models.Message]{},
 
 		stop: make(chan struct{}),
 
@@ -42,8 +42,8 @@ func TestConnectionClient_Send(t *testing.T) {
 
 	ccClient.Send(message)
 
-	if ccClient.sendQueue.Len() != 0 {
-		t.Errorf("expected sendQueue should not be empty, got %d", ccClient.sendQueue.Len())
+	if ccClient.egress.Len() != 0 {
+		t.Errorf("expected sendQueue should not be empty, got %d", ccClient.egress.Len())
 	}
 
 	msg := ccServer.Receive()

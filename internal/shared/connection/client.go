@@ -10,8 +10,8 @@ import (
 type ConnectionClient struct {
 	stop chan struct{}
 
-	receiveQueue *queue.Queue[models.Message]
-	sendQueue    *queue.Queue[models.Message]
+	ingress *queue.Queue[models.Message]
+	egress  *queue.Queue[models.Message]
 
 	conn *net.Conn
 }
@@ -24,8 +24,8 @@ func (cc *ConnectionClient) RemoteAddress() string {
 
 func newConnectionClient() *ConnectionClient {
 	return &ConnectionClient{
-		receiveQueue: queue.New[models.Message](),
-		sendQueue:    queue.New[models.Message](),
+		ingress: queue.New[models.Message](),
+		egress:  queue.New[models.Message](),
 	}
 }
 

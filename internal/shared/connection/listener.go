@@ -98,8 +98,8 @@ func Listen(socketAddr string, onReceive func(msg *models.Message, cc *Connectio
 
 func newListenerConnection(conn *net.Conn) *ConnectionClient {
 	return &ConnectionClient{
-		receiveQueue: queue.New[models.Message](),
-		sendQueue:    queue.New[models.Message](),
+		ingress: queue.New[models.Message](),
+		egress:    queue.New[models.Message](),
 
 		conn: conn,
 	}
