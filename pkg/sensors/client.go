@@ -29,18 +29,17 @@ func (sc *SensorClient) Init() {
 	}
 }
 
+// SendToReceiver starts ticker for each sensor to generate sensor data to be sent to the cloud application receiver
 func (sc *SensorClient) SendToReceiver(stopChan <-chan bool, send func(models.Message)) {
 
 	dataChan := make(chan string)
 
-	// Start generating data for each sensor
 	for _, sensor := range sc.sensors {
 		go utils.StartTicker(sensor.Interval, func() string {
 			return sensor.Sensor.GenerateData().ToString()
 		}, stopChan, dataChan)
 	}
 
-	// Collect and print data for demonstration purposes
 	go func() {
 		for data := range dataChan {
 			send(models.NewMessage(models.Sensor, models.NewSensorMessage(data)))
@@ -48,6 +47,7 @@ func (sc *SensorClient) SendToReceiver(stopChan <-chan bool, send func(models.Me
 	}()
 }
 
+// Start initializes the sensors and starts the data generation process
 func (sc *SensorClient) Start(stopChan <-chan bool, send func(models.Message)) {
 	sc.Init()
 	sc.SendToReceiver(stopChan, send)
