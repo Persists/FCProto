@@ -2,9 +2,58 @@
 
 This repository contains a prototype developed for the Fog Computing lecture. The project demonstrates the key principles and practical applications of fog computing, including distributed data processing and edge device coordination.
 
-### Components
+## Cmd 
+The directory contains the main entry points for the cloud and edge applications.
 
-The projects holds the following components:
+## Deployment
+Configuration files for Docker and Terraform to deploy the application.
 
-- **Queue**: A simple queue implementation that can be used to store and retrieve data. The Idea behind this component is that when i message should be sent to the cloud, it is stored in the queue and then sent to the cloud when the connection is available. This way, the message is not lost when the connection is down. When the cloud receives the message it is put in the queue of the cloud and then processed. This way, the cloud can also store messages when the connection to the edge device is down. So both the edge device and the cloud have two queues, one for sending and one for receiving messages. Furthermore this queue should enable parallel processing of messages.
-- **Connection**: This package is responsible for the connection between the edge device and the cloud. It is able to send and receive messages from the edge device to the cloud and vice versa. The connection is able to handle the case when the connection is down and stores the messages in the queue. When the connection is up again, the messages are sent to the cloud or the edge device respectively.
+### Docker
+Start the cloud environment with the following command:
+```bash
+docker compose up cloud
+```
+
+Start the edge application with the following command:
+```bash
+docker compose up edge
+```
+
+### Terraform
+To provision the cloud infrastructure with Terraform, navigate to the `terraform` directory and run the following commands:
+```bash
+terraform init
+terraform validate
+terraform plan
+terraform apply
+```
+### Ansible & Kubernetes
+We originally tried to deploy the application with microk8s and ansible to make the usage scenario as realistic as possible. Unfortunately, we did not manage to get microk8s to use the cloud node completely. 
+It was only classified as ready, but no pods were released. It only worked locally to run the fog computing deployment with node affinity. We thought it was a pity to throw away the big effort and therefore decided to keep the code in the repository. 
+
+## Docs
+The docs directory contain documentation for the project like the demonstration video and the project description report.
+
+<video width="568" height="320" controls>
+  <source src="./docs/show-case-recording.mp4" type="video/mp4">
+</video>
+
+## Internal
+### Cloud
+The cloud directory contains logic that is only executed on the cloud side. This includes env configurations, database logic with entities and logic to start up server.
+
+### Edge
+The edge directory contains logic that is only executed on the edge side. This includes env configurations and logic to start up the edge.
+
+### Shared
+The shared directory contains logic that is shared between the cloud and edge side. This includes the message model, queue logic, connection logic and utility functions.
+
+## Pkg
+The pkg directory contains all sensor logic developed for the project.
+
+### Sensor
+Sensor interval can be adjusted in the sensor client. 
+The sensor logic is responsible for generating data and run on the edge application. There are three different sensors implemented:
+- **VirtualSensor**: Generates random temperature & humidity data.
+- **MemorySensor**: Generates memory usage data.
+- **CpuSensor**: Generates CPU usage data.
