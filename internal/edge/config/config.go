@@ -10,15 +10,14 @@ import (
 )
 
 type ClientConfig struct {
-	NotifyPort string
-	SendPort   int
+	SendPort int
 
 	*models.BaseEnv
 }
 
 // LoadConfig loads the client configuration from the environment for the edge
 func LoadConfig() (*ClientConfig, error) {
-	err := godotenv.Load("..edge.env")
+	_ = godotenv.Load(".edge.env")
 
 	port, err := strconv.Atoi(utils.GetEnv("SEND_PORT", "5557"))
 	if err != nil {
@@ -26,9 +25,8 @@ func LoadConfig() (*ClientConfig, error) {
 	}
 
 	config := &ClientConfig{
-		BaseEnv:    &models.BaseEnv{SocketAddr: utils.GetEnv("SOCKET_ADDR", "localhost:5555")},
-		NotifyPort: utils.GetEnv("NOTIFY_PORT", "5556"),
-		SendPort:   port,
+		BaseEnv:  &models.BaseEnv{SocketAddr: utils.GetEnv("SOCKET_ADDR", "localhost:5555")},
+		SendPort: port,
 	}
 
 	return config, nil

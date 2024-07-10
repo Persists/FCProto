@@ -15,7 +15,7 @@ type ServerConfig struct {
 
 // LoadConfig loads the server configuration from the environment
 func LoadConfig() (*ServerConfig, error) {
-	godotenv.Load(".cloud.env")
+	_ = godotenv.Load(".cloud.env")
 
 	baseEnv := &models.BaseEnv{
 		SocketAddr: utils.GetEnv("SOCKET_ADDR", ":5555"),

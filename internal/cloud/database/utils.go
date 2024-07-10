@@ -50,13 +50,16 @@ func UpsertClient(db *DB, remoteAddr string) *entities.ClientEntity {
 		log.Printf("Failed to split remote address: %v", err)
 	}
 	newClient.IpAddr = ip
-
-	db.NewInsert().
+	_, err = db.NewInsert().
 		Model(newClient).
 		On("CONFLICT (ip_addr) DO UPDATE").
 		Set("ip_addr = EXCLUDED.ip_addr, last_seen = NOW()").
 		Returning("*").
 		Exec(ctx)
+
+	if err != nil {
+		log.Printf("Failed to upsert client: %v", err)
+	}
 
 	return newClient
 }

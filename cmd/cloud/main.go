@@ -18,7 +18,10 @@ func main() {
 	cc := cloud.NewClient()
 
 	// initialize the cloud client
-	cc.Init(config)
+	err = cc.Init(config)
+	if err != nil {
+		log.Fatalf("failed to initialize the cloud client: %v", err)
+	}
 
 	// start the cloud client
 	err = cc.Start()
