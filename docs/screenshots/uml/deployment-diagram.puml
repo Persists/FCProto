@@ -1,0 +1,35 @@
+@startuml
+title Deployment Architecture
+
+
+cloud "Google Cloud" <<cloud>> {
+    node "N2 Standard 4" as gce {
+       component Docker {
+           database PostgresDB as db
+           component "Cloud Application" as ca
+           ca <--> db: "Store Data"
+
+           component "Cloud Beaver" as cb
+           cb -right-> db: "Inspect data"
+       }
+    }
+}
+
+
+rectangle "Virtual Network" <<network>> {
+    rectangle "WireGuard VPN" as vpn
+}
+
+rectangle "Local Environment" <<local>> {
+    node "Local VM" as localVM {
+       component "Docker" as DockerVM {
+           component "Edge Application" as ea
+
+       }
+   }
+}
+
+
+ca -right- vpn : Analyse data
+ea -left- vpn : Send data to process
+@enduml

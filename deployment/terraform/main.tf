@@ -12,10 +12,6 @@ resource "google_compute_instance" "default" {
 
   network_interface {
     network = "default"
-
-    access_config {
-      # Ephemeral public IP
-    }
   }
 
   metadata = {
@@ -39,7 +35,7 @@ resource "google_compute_firewall" "allow_microk8s_ingress" {
     ports    = ["4789"]
   }
 
-  source_ranges = ["0.0.0.0/0"]  # Open to all IPs; modify this to restrict access as needed
+  source_ranges = ["0.0.0.0/0"]
   target_tags = ["allow-microk8s-ports"]
 }
 
