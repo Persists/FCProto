@@ -14,7 +14,7 @@ users:
     lock_passwd: false
     ssh_authorized_keys:
       - "ssh-rsa ..." # an SSH public key that is authorized
-      # to connect to this account# Run a few commands (update apt's repo indexes and install curl)
+
 runcmd:
   - sudo apt-get update
   - sudo apt install curl -q -y
