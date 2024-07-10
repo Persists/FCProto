@@ -37,6 +37,7 @@ The docs directory contain documentation for the project like the demonstration 
 
 https://github.com/Persists/FCProto/assets/66205241/70e9d9b9-f200-47ad-80a3-8487c05bb13b
 
+Open the prototyping assignment report [here](./docs/prototyping_assignment_report.pdf).
 
 
 ## Internal
