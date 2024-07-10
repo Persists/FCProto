@@ -19,6 +19,8 @@ Start the edge application with the following command:
 docker compose up edge
 ```
 
+The docker image repository can be found [here](https://hub.docker.com/repository/docker/codinggandalf/fog-computing/general).
+
 ### Terraform
 To provision the cloud infrastructure with Terraform, navigate to the `terraform` directory and run the following commands:
 ```bash
