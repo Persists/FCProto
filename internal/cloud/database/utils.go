@@ -71,7 +71,7 @@ func GetRecentSensorMessages(db *DB, ipAddr string) (sensorMessages [][]byte, in
 		Column("content").
 		Scan(ctx, &contentArray)
 	if err != nil {
-		log.Printf("Failed to get sensor messages of last 30 seconds: %v", err)
+		log.Printf("Failed to get sensor messages of last 1 minute: %v", err)
 		return nil, err
 	}
 
