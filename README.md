@@ -34,9 +34,10 @@ It was only classified as ready, but no pods were released. It only worked local
 ## Docs
 The docs directory contain documentation for the project like the demonstration video and the project description report.
 
-<video width="568" height="320" controls>
-  <source src="./docs/show-case-recording.mp4" type="video/mp4">
-</video>
+
+https://github.com/Persists/FCProto/assets/66205241/70e9d9b9-f200-47ad-80a3-8487c05bb13b
+
+
 
 ## Internal
 ### Cloud
